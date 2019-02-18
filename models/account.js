@@ -2,7 +2,6 @@ import { DB } from './'
 import axios from 'axios'
 
 import * as Yup from 'yup'
-import TransactionModel from './transaction'
 
 class Account {
   static get type() {

@@ -10,13 +10,13 @@ export default function({
   icon = null}) {
   return (
     <View style={style.container}>
-      <Text h3>
+      <Text h3 style={style.text}>
         {icon && <Icon name={icon} />}
         {title}
       </Text>
       {
         subtitle && (
-          <Text h5>
+          <Text h5 style={style.text}>
             {subtitle}
           </Text>
         )
@@ -26,11 +26,12 @@ export default function({
 }
 
 const style = StyleSheet.create({
-  container: {
+  text: {
     textAlign: 'center',
-    alignItems: 'center',
+  },
+  container: {
+
     justifyContent: 'center',
-    width: '100%',
     flex: 1
   }
 })

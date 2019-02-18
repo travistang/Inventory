@@ -1,6 +1,6 @@
 import React from 'react'
 import {
-  Platform, StyleSheet,
+  StyleSheet,
   View,
   ScrollView,
   TouchableOpacity,
@@ -26,7 +26,7 @@ export default class AccountPage extends React.Component {
         <View style={{
             marginLeft: 16,
             flexDirection: 'row', alignItems: 'center'}}>
-          <Icon name="bank" />
+          <Icon name="bank" size={22} />
           <Text> {' '} </Text>
           <TouchableOpacity
             onPress={
@@ -97,13 +97,14 @@ export default class AccountPage extends React.Component {
       accountViewOpened: true
     })
   }
+  
   closeAddAccountView() {
     this.setState({
       accountViewOpened: false
     })
     this.loadAccountList()
-
   }
+
   render() {
     return (
       <ScrollView

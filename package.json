@@ -9,6 +9,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "formik": "^1.4.3",
+    "js-quantities": "^1.7.3",
     "pouchdb-adapter-asyncstorage": "^6.4.1",
     "pouchdb-find": "^7.0.0",
     "pouchdb-react-native": "^6.4.1",

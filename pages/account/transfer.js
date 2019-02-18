@@ -21,7 +21,7 @@ export default class TransferPage extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      accountList: [],
+      accountList : [],
       fromAccount: null
     }
   }

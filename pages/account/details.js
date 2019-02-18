@@ -101,7 +101,11 @@ export default class AccountDetailsPage extends React.Component {
       account: this.state.account,
     })
   }
-
+  buy() {
+    this.props.navigation.push("BuyPage", {
+      account: this.state.account
+    })
+  }
   buttonGroup() {
     return (
       <View style={style.buttonGroup}>
@@ -134,7 +138,7 @@ export default class AccountDetailsPage extends React.Component {
           <ActionBox
             icon="shopping-cart"
             text="Buy"
-            onPress={this.addIncome.bind(this)}
+            onPress={this.buy.bind(this)}
             color="grey"
           />
         </View>
@@ -202,11 +206,6 @@ export default class AccountDetailsPage extends React.Component {
           }
         </Card>
 
-        <View style={style.transactionListContainer}>
-          {
-            this.getAccountTransactionsList()
-          }
-        </View>
       </ScrollView>
     )
   }

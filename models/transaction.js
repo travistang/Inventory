@@ -1,6 +1,7 @@
 import { DB } from './'
 import * as Yup from 'yup'
 import AccountModel from './account'
+import ItemModel from './items'
 import * as moment from 'moment'
 import * as _ from 'lodash'
 /*
@@ -249,6 +250,59 @@ class Transactions {
         {from: _id},
         {to: _id}
       ]
+    })
+  }
+
+  /*
+      Methods related to items
+      items: [{
+        name: String,
+        amount: Number,
+        cost: Number > 0
+      }],
+      date: Date
+  */
+  async buy({
+    fromAccount,
+    items, // this is a list!
+    name,
+    date,
+  }) {
+    try {
+      await Yup.object.shape({
+        items: Yup.array().required().of({
+          name: Yup.string().required(),
+          amount: Yup.number().moreThan(0).required(),
+          cost: Yup.number().min(0).required()
+        }),
+        name: Yup.string().required(),
+        date: Yup.date().required(),
+        fromAccount: Yup.string().required()
+      }).validate({ fromAccount, items, name, date})
+    } catch(err) {
+      return
+    }
+
+    // check if total expenditure is more than sum of account.
+    const account = await AccountModel.getAccountById(fromAccount)
+    if(!account) return
+    const { amount: surplus } = account
+
+    const totalExpenditure = items.reduce((sum, item) => sum + item.cost)
+    if (totalExpenditure > account.surplus) return null
+    await AccountModel.addIncome({
+      accountId: account._id,
+      amount: -totalExpenditure
+    })
+    // add all items
+    items.forEach(ItemModel.add.bind(ItemModel))
+
+    return await this.addTransactionRecord({
+      name,
+      date,
+      consumedAmount: totalExpenditure,
+      from: fromAccount,
+      transactionType: Transactions.TransactionTypes.BUY
     })
   }
 }

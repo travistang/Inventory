@@ -12,8 +12,11 @@ import AccountPage from './pages/account'
 import AccountDetailsPage from './pages/account/details'
 import AddIncomePage from './pages/account/income'
 import TransferPage from './pages/account/transfer'
+import BuyPage from './pages/account/buy'
 
 import ItemPage from './pages/item'
+import ItemDetailsPage from './pages/item/details'
+import CreateItemPage from './pages/item/createItemPage'
 
 import { FormattedProvider } from 'react-native-globalize'
 import {
@@ -32,17 +35,26 @@ const RootNavigator = createBottomTabNavigator({
     Account: { screen: AccountPage },
     AccountDetails: { screen: AccountDetailsPage },
     AddIncomePage: { screen: AddIncomePage },
-    TransferPage: { screen: TransferPage }
+    TransferPage: { screen: TransferPage },
+    BuyPage: { screen: BuyPage }
+  }),
+  Buy: createStackNavigator({
+    GeneralBuyPage: { screen: BuyPage },
   }),
   Items: createStackNavigator({
-    Items: { screen: ItemPage }
-  })
+    Items: { screen: ItemPage },
+    ItemDetailsPage: { screen: ItemDetailsPage },
+    CreateItemPage: { screen: CreateItemPage },
+  }),
+
 }, {
   defaultNavigationOptions: ({ navigation }) => ({
     tabBarIcon: ({ focused, horizontal, tintColor }) => {
       const { routeName } = navigation.state
       const iconName = {
-        Account: "bank"
+        Account: "bank",
+        Items: "gift",
+        Buy: "shopping-cart"
       }
       return (<Icon
         name={iconName[routeName]}

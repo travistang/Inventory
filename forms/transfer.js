@@ -116,7 +116,7 @@ export default function({
               >
                 {
                   toAccountList.map((acc,i) => (
-                    <Picker.Item key={i} label={acc.name} val={acc._id} />
+                    <Picker.Item key={i} label={acc.name} value={acc._id} />
                   ))
                 }
               </Picker>
