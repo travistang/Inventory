@@ -81,7 +81,6 @@ class Transactions {
     currentAmount,
     accountId,
   }) {
-    // alert(JSON.stringify(transaction))
     const {
       consumedAmount = 0,
       obtainedAmount = 0,
@@ -269,17 +268,20 @@ class Transactions {
     date,
   }) {
     try {
-      await Yup.object.shape({
-        items: Yup.array().required().of({
-          name: Yup.string().required(),
-          amount: Yup.number().moreThan(0).required(),
-          cost: Yup.number().min(0).required()
-        }),
+      await Yup.object().shape({
+        items: Yup.array().required().of(
+          Yup.object().shape({
+            name: Yup.string().required(),
+            amount: Yup.number().moreThan(0).required(),
+            cost: Yup.number().min(0).required()
+          })
+        ),
         name: Yup.string().required(),
         date: Yup.date().required(),
         fromAccount: Yup.string().required()
       }).validate({ fromAccount, items, name, date})
     } catch(err) {
+      alert(`error validating buy: ${err.message}`)
       return
     }
 
@@ -288,14 +290,20 @@ class Transactions {
     if(!account) return
     const { amount: surplus } = account
 
-    const totalExpenditure = items.reduce((sum, item) => sum + item.cost)
-    if (totalExpenditure > account.surplus) return null
+    const totalExpenditure = items.reduce((sum, item) => sum + item.cost, 0.0)
+    // you can't spend more than you have... for now
+    if (totalExpenditure > surplus) return null
     await AccountModel.addIncome({
       accountId: account._id,
       amount: -totalExpenditure
     })
+
     // add all items
-    items.forEach(ItemModel.add.bind(ItemModel))
+    let canAddSuccessfully = true
+    items.forEach(async itemChange => {
+      let result = await ItemModel.add(itemChange)
+      if(!result) canAddSuccessfully = false
+    })
 
     return await this.addTransactionRecord({
       name,

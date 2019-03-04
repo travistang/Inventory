@@ -38,10 +38,11 @@ export default class AccountTrendLine extends React.Component {
       xAxis: {visible: false},
       grid: { visible: false },
       area: {
-        gradientFrom: '#10ac84',
-        gradientFromOpacity: 1,
-        gradientTo: '#10ac84',
-        gradientToOpacity: 0.4,
+        visible: false,
+        // gradientFrom: '#10ac84',
+        // gradientFromOpacity: 1,
+        // gradientTo: '#10ac84',
+        // gradientToOpacity: 0.4,
       },
 
     }
@@ -63,13 +64,12 @@ export default class AccountTrendLine extends React.Component {
     if(data.length < 2) {
       return (
         <View style={style.container}>
-          <Text h4 style={style.noDataText}>
+          <Text h5 style={style.noDataText}>
             Not enough data to show trend
           </Text>
         </View>
       )
     }
-    alert(JSON.stringify(data))
     return (
       <TouchableOpacity
         disabled={!onPress}

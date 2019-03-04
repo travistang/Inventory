@@ -16,3 +16,8 @@ export const FormatCurrency = (amount, currency) => {
       return `${negativeSign}${value}${currency}`
   }
 }
+
+export const FormatItemAmount = (amount, item) => {
+  const { unit } = item
+  return `${amount} ${unit}`
+}

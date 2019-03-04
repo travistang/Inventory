@@ -10,8 +10,10 @@ export default function({
   icon = null}) {
   return (
     <View style={style.container}>
+      <Text h1 style={style.text}>
+        {icon && <Icon name={icon} size={72}/>}
+      </Text>
       <Text h3 style={style.text}>
-        {icon && <Icon name={icon} />}
         {title}
       </Text>
       {
@@ -30,7 +32,6 @@ const style = StyleSheet.create({
     textAlign: 'center',
   },
   container: {
-
     justifyContent: 'center',
     flex: 1
   }

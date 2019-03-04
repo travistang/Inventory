@@ -13,7 +13,7 @@ import AccountDetailsPage from './pages/account/details'
 import AddIncomePage from './pages/account/income'
 import TransferPage from './pages/account/transfer'
 import BuyPage from './pages/account/buy'
-
+import theme from './theme'
 import ItemPage from './pages/item'
 import ItemDetailsPage from './pages/item/details'
 import CreateItemPage from './pages/item/createItemPage'
@@ -67,7 +67,7 @@ const AppContainer = createAppContainer(RootNavigator)
 export default class App extends React.Component {
   render() {
     return (
-      <ThemeProvider>
+      <ThemeProvider theme={theme}>
         <FormattedProvider>
           <AppContainer />
         </FormattedProvider>

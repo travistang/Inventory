@@ -12,7 +12,8 @@ class Item {
     return {
       name: '',
       amount: 0,
-      unit: ''
+      unit: '',
+      // craftable: true,
     }
   }
 
@@ -25,7 +26,7 @@ class Item {
         .required('Amount required'),
       unit: Yup.string()
         .oneOf(recognizedUnits)
-        .required('unit required')
+        .required('unit required'),
     })
   }
 
@@ -66,7 +67,7 @@ class Item {
   // perform case insensitive search
   async getItemByName(name) {
     return await this.DB.findOneAsync({
-      name: { $regex: new RegExp(`/${name}/i`)},
+      name: { $regex: new RegExp(`${name}`, 'i')},
       type: Item.type,
     })
   }

@@ -1,13 +1,15 @@
 import React from 'react'
 import TransactionModel from '../../models/transaction'
 import {
-  View, StyleSheet
+  View, StyleSheet,
+  ToastAndroid
 } from 'react-native'
 import {
   Text,
   ListView,
 } from 'react-native-elements'
 import Icon from 'react-native-vector-icons/dist/FontAwesome'
+import BuyForm from '../../forms/buy'
 
 export default class BuyPage extends React.Component {
   static navigationOptions = ({ navigation }) => {
@@ -49,13 +51,35 @@ export default class BuyPage extends React.Component {
       account: this.props.navigation.getParam('account')
     })
   }
+  async onBuy({ name, date, items, fromAccount}) {
+    try {
+      const buyResult = await TransactionModel.buy({
+        fromAccount,
+        items, name, date
+      })
 
+      ToastAndroid.show(`${items.length} items bought`,
+        ToastAndroid.SHORT,
+        ToastAndroid.BOTTOM)
+
+      return buyResult
+
+    } catch(err) {
+      ToastAndroid.show(`error: ${err.message}`,
+          ToastAndroid.SHORT,
+          ToastAndroid.BOTTOM)
+      return false
+    }
+
+  }
   render() {
     const { account } = this.state
-    // TODO: differentiate between buy with specific account and buy with non-specific account
-    if(!account) return null
     return (
       <View style={style.container}>
+        <BuyForm
+          onBuy={this.onBuy.bind(this)}
+          account={account}
+        />
       </View>
     )
   }
