@@ -44,6 +44,7 @@ class Transactions {
       from: null,
       to: null,
       date: moment().toDate(),
+      items: [],
       transactionType:
         Transactions.TransactionTypes.BUY
     }
@@ -54,6 +55,7 @@ class Transactions {
   }
 
   validationSchema() {
+    const { TransactionTypes } = Transactions
     return Yup.object().shape({
       name: Yup.string()
         .required('Name required'),
@@ -65,10 +67,23 @@ class Transactions {
       from: Yup.string(),
       to: Yup.string(),
       date: Yup.date().required().min(new Date()),
+      items: Yup.array().of(
+        Yup.object().shape({
+          name: Yup.string().required("Item name required"),
+          amount: Yup.number().moreThan(0).required("Item amount required"),
+          cost: Yup.number().min(0)
+        })
+      ).when("transactionType", {
+          is: type => ([
+              TransactionTypes.CONSUME,
+              TransactionTypes.CRAFT
+            ].indexOf(type) > -1),
+          then: Yup.array().required()
+        }),
       transactionType: Yup.string()
         .required("Transaction type required")
         .oneOf(
-          Object.values(Transactions.TransactionTypes)),
+          Object.values(TransactionTypes)),
     })
   }
   /*
@@ -147,6 +162,24 @@ class Transactions {
   }) {
     return await this.income({name, accountId, amount: -amount})
   }
+  async consume({
+    name,
+    items
+  }) {
+    // for each item, record the consumption
+    // everything is the same, except the amount takes a negative sign as this is a consumption transaction
+    await Promise.all(
+      items.map(item =>
+        ({...item, amount: -item.amount})
+      ).map(ItemModel.add.bind(ItemModel))
+    )
+    const { CONSUME } = Transactions.TransactionTypes
+    // then add the transaction record
+    return await this.addTransactionRecord({
+      name, items,
+      transactionType: CONSUME
+    })
+  }
 
   async income({
     name,
@@ -223,15 +256,20 @@ class Transactions {
   // DO NOT CALL THIS DIRECTLY FROM OUTSIDE OF THIS CLASS!
   async addTransactionRecord({
     name,
-    date,
+    date = new Date(),
     consumedAmount = 0,
     obtainedAmount = 0,
     from = null, to = null,
     exchangeRate = null,
+    items = [],
     transactionType = Transactions.TransactionTypes.BUY}) {
-    // at least one of the
-    if(!from && !to) return null
-    if(!consumedAmount && !obtainedAmount) return null
+    const { CONSUME, CRAFT } = Transactions.TransactionTypes
+    const itemsOnly = [CONSUME, CRAFT].indexOf(transactionType) > -1
+
+    // at least one of the "from" and "to" is there
+    // except when this transaction involves items only
+    if(!from && !to && !itemsOnly) return null
+    if(!consumedAmount && !obtainedAmount && !itemsOnly) return null
 
     return await this.DB.insertAsync({
       name,
@@ -239,6 +277,7 @@ class Transactions {
       date,
       from, to,
       transactionType,
+      items,
       type: Transactions.type
     })
   }
@@ -310,7 +349,8 @@ class Transactions {
       date,
       consumedAmount: totalExpenditure,
       from: fromAccount,
-      transactionType: Transactions.TransactionTypes.BUY
+      transactionType: Transactions.TransactionTypes.BUY,
+      items
     })
   }
 }

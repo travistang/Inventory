@@ -17,6 +17,8 @@ import theme from './theme'
 import ItemPage from './pages/item'
 import ItemDetailsPage from './pages/item/details'
 import CreateItemPage from './pages/item/createItemPage'
+import ConsumePage from './pages/consume'
+import TransactionPage from './pages/transaction'
 
 import { FormattedProvider } from 'react-native-globalize'
 import {
@@ -46,6 +48,12 @@ const RootNavigator = createBottomTabNavigator({
     ItemDetailsPage: { screen: ItemDetailsPage },
     CreateItemPage: { screen: CreateItemPage },
   }),
+  Consume: createStackNavigator({
+    Consume: { screen: ConsumePage }
+  }),
+  Transactions: createStackNavigator({
+    Transactions: { screen: TransactionPage }
+  })
 
 }, {
   defaultNavigationOptions: ({ navigation }) => ({
@@ -54,7 +62,9 @@ const RootNavigator = createBottomTabNavigator({
       const iconName = {
         Account: "bank",
         Items: "gift",
-        Buy: "shopping-cart"
+        Buy: "shopping-cart",
+        Consume: "fire",
+        Transactions: "exchange"
       }
       return (<Icon
         name={iconName[routeName]}

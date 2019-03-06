@@ -32,11 +32,6 @@ export default class AccountDetailsPage extends React.Component {
     if(!account) return {}
     return {
       headerTitle: account.name,
-      headerRight: (
-        <TouchableOpacity>
-          <Icon name="chart-bar" size={32} />
-        </TouchableOpacity>
-      )
     }
   }
   static propTypes = {

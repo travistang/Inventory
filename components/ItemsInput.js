@@ -73,7 +73,7 @@ export default class ItemsInput extends React.Component {
     account: PropTypes.shape({
       name: PropTypes.string.isRequired,
       currency: PropTypes.string.isRequired,
-    }).isRequired // for determining the currency
+    }) // for determining the currency
   }
 
   constructor(props) {
@@ -141,12 +141,13 @@ export default class ItemsInput extends React.Component {
   // a function that renders a preview of change of items.
   previewItemListItem(changedItem) {
     const { isBuying,
-      account: { currency } = {currency: ""}
+      account = {currency: ""}
     } = this.props
+    const { currency } = account
     const { name, amount: amountDiff, cost } = changedItem
     const originalItem = this.getOriginalItem(name)
     const { amount: originalAmount, unit } = originalItem
-    const newAmount = originalAmount + isBuying?(amountDiff):(-amountDiff)
+    const newAmount = originalAmount + (isBuying?(amountDiff):(-amountDiff))
     const amountChangedText = (
       <View style={style.amountChangedTextContainer}>
         <Text style={style.previewItemPrice}>
@@ -166,12 +167,25 @@ export default class ItemsInput extends React.Component {
         quantity: amountDiff,
       })
     }
+    const getBadge = () => {
+      if(isBuying) {
+        return {
+          value: FormatCurrency(cost, currency),
+          size: 'large'
+        }
+      } else {
+        return {
+          value: FormatItemAmount(amountDiff, originalItem),
+          size: 'large'
+        }
+      }
+    }
     return (
       <ListItem
         onPress={onSelectItem}
         title={name}
         subtitle={amountChangedText}
-        badge={isBuying && {value: FormatCurrency(cost, currency), size: 'large'}}
+        badge={getBadge()}
         rightElement={
           <Button
             type="clear"
@@ -226,18 +240,25 @@ export default class ItemsInput extends React.Component {
     let icons = "space-bar,percentage,times".split(',')
     let colors="brown,blue,green".split(',')
     if (!isBuying) {
-      names="literally,% left,% of".split(',')
-      icons="space-bar,integral,less-than-equal".split(',')
+      names="literally,remaining,% left,% of".split(',')
+      icons="space-bar,remove,integral,less-than-equal".split(',')
     }
 
     const options = _.zipWith(
       names, icons, colors,
       (name, icon ,color) => ({
         name, icon, color
-      }))
+      })
+    )
     return options
   }
+  /*
+    Quantity is the ABSOLUTE DIFFERENCE of this transaction
+    totalAmount: the current amount of this item
+    quantity: input value
+  */
   convertQuantityToRealAmount() {
+    const { isBuying } = this.props
     const {
       quantityInterpretationMode,
       quantity,
@@ -247,13 +268,15 @@ export default class ItemsInput extends React.Component {
     switch(quantityInterpretationMode) {
       case "literally":
         return quantity
-      case '% increased':
+      case "remaining":
+        return totalAmount - quantity
       case '% left':
-        return totalAmount * quantity / 100
-      case 'times':
-        return totalAmount * quantity
-      case '% of':
         return totalAmount * (1 - quantity / 100)
+      case 'times':
+        return totalAmount * (1 + quantity)
+      case '% increased':
+      case '% of':
+        return totalAmount * (quantity / 100)
       default:
         return 0
     }
@@ -278,19 +301,22 @@ export default class ItemsInput extends React.Component {
       quantityInterpretationMode,
       cost
     } = this.state
-    const { isBuying, account: { currency }} = this.props
+    const { isBuying,
+      account: { currency } = { currency: ""}
+    } = this.props
     const {name, amount, unit} = item
     const amountLabel = "Amount " + isBuying?
       "buying":"consuming"
 
+    // real amount is the ABSOLUTE DIFFERENCES in this action (buy or consume)
     const realAmount = this.convertQuantityToRealAmount()
     const submitAmount = () => {
+      let payload = {name, amount: realAmount}
+      if(isBuying) payload.cost = cost
       this.setState({
-        itemChanges: this.state.itemChanges.concat({
-          name,
-          amount: realAmount,
-          cost
-        })
+        itemChanges: this.state.itemChanges
+          .filter(changes => changes.name != payload.name) // to remove duplicates from previous adds
+          .concat(payload)
       }, () => this.resetQuantityForm())
     }
     return (
@@ -361,7 +387,11 @@ export default class ItemsInput extends React.Component {
           <Button
             icon={{name: "check", color: 'white'}}
             title="Confirm"
-            disabled={!realAmount || !cost}
+            disabled={
+              !realAmount ||
+              (isBuying && !cost) ||
+              (!isBuying && realAmount > amount)
+            }
             onPress={submitAmount.bind(this)}
           />
         </View>
@@ -428,8 +458,9 @@ export default class ItemsInput extends React.Component {
       choosingQuantityForItem } = this.state
     const {
       isBuying, onFinishSelection,
-      account: { currency } = {currency: null}
+      account = { currency: "" }
     } = this.props
+    const { currency } = account
     return (
 
       <ScrollView>

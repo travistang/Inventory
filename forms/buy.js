@@ -15,7 +15,6 @@ import {
 
 import * as Yup from 'yup'
 import * as _ from 'lodash'
-import TransactionModel from '../models/transaction'
 import AccountModel from '../models/account'
 import ItemsInput from '../components/ItemsInput'
 import TextInput from '../components/TextInput'
@@ -132,7 +131,7 @@ export default class BuyForm extends React.Component {
                 type="outline"
                 disabled={_.isEmpty(values["items"])}
                 onPress={() => this.buy({values, resetForm})}
-                icon={{name: "shopping-cart", color: 'white'}}
+                icon={{name: "shopping-cart" }}
                 buttonStyle={{color: 'green'}}
                 title="Buy"
               />
@@ -151,7 +150,7 @@ export default class BuyForm extends React.Component {
     this.props.onBuy(values)
       .then(() => resetForm({}))
       .then(() => this.clearItems())
-      
+
   }
 }
 
