@@ -20,7 +20,7 @@ import * as _ from 'lodash'
   ***
 
 */
-class Transactions {
+export class Transactions {
   static get type() {
     return "TRANSACTION"
   }
@@ -34,6 +34,14 @@ class Transactions {
       CONSUME: "CONSUME", // Things -> (),
       SPEND: "SPEND" // Money -> ()
     }
+  }
+
+  // types that involve only items, therefore no money is involved
+  static get ItemOnlyTypes() {
+    const { CONSUME, CRAFT } = Transactions.TransactionTypes
+    return [
+      CONSUME, CRAFT
+    ]
   }
 
   static get initialTransactionValues() {
@@ -280,6 +288,27 @@ class Transactions {
       items,
       type: Transactions.type
     })
+  }
+  // get recent transactions from the database, sorted from newest to oldest.
+  // this returns the `pages * numRecords`-th to `(pages + 1 ) * numRecords`-th transactions
+  async getRecentTransactions({ numRecords = 10, page = 0}) {
+    return new Promise((resolve, reject ) => this.DB.find({
+      type: Transactions.type,
+    })
+    .sort({ date: -1})
+    .skip(numRecords * page)
+    .limit(numRecords)
+    .exec(
+      (err, res) => (err?reject(err):resolve(res))
+    ))
+  }
+  async getTotalNumberOfTransactions() {
+    return await new Promise((res, _) =>
+      this.DB.count(
+        { type: Transactions.type },
+        (err, count) => err?reject():res(count)
+      )
+    )
   }
   async getTransactionsOfAccount({_id}) {
     return await this.DB.findAsync({

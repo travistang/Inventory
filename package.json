@@ -15,8 +15,10 @@
     "react": "16.6.3",
     "react-intl-native": "^2.1.2",
     "react-native": "^0.58.6",
+    "react-native-chart-kit": "^2.2.1",
     "react-native-elements": "^1.0.0",
     "react-native-gesture-handler": "^1.0.15",
+    "react-native-global-props": "^1.1.5",
     "react-native-globalize": "^2.3.0",
     "react-native-local-mongodb": "^2.2.5",
     "react-native-responsive-linechart": "^1.5.0",
@@ -37,5 +39,8 @@
   },
   "jest": {
     "preset": "react-native"
+  },
+  "rnpm": {
+     "assets": ["assets/fonts/Raleway"]
   }
 }

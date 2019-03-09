@@ -7,6 +7,7 @@
  * @lint-ignore-every XPLATJSCOPYRIGHT1
  */
 import React from 'react'
+import { configureGlobalProps } from './theme'
 
 import AccountPage from './pages/account'
 import AccountDetailsPage from './pages/account/details'
@@ -18,7 +19,9 @@ import ItemPage from './pages/item'
 import ItemDetailsPage from './pages/item/details'
 import CreateItemPage from './pages/item/createItemPage'
 import ConsumePage from './pages/consume'
+
 import TransactionPage from './pages/transaction'
+import TransactionDetailsPage from './pages/transaction/details'
 
 import { FormattedProvider } from 'react-native-globalize'
 import {
@@ -29,7 +32,11 @@ import {
 import { View, Text } from 'react-native'
 import { ThemeProvider } from 'react-native-elements'
 import Icon from 'react-native-vector-icons/dist/FontAwesome'
+import { colors } from './theme'
 
+const {
+  background, primary
+} = colors
 
 // App navigation structure
 const RootNavigator = createBottomTabNavigator({
@@ -52,11 +59,23 @@ const RootNavigator = createBottomTabNavigator({
     Consume: { screen: ConsumePage }
   }),
   Transactions: createStackNavigator({
-    Transactions: { screen: TransactionPage }
+    Transactions: { screen: TransactionPage },
+    AccountDetailsFromTransaction: { screen: AccountDetailsPage },
+    TransactionDetailsPage: { screen: TransactionDetailsPage }
   })
+
 
 }, {
   defaultNavigationOptions: ({ navigation }) => ({
+    tabBarOptions: {
+      style: {
+        borderTopColor: "transparent",
+        backgroundColor: background,
+      },
+      showLabel: false,
+      activeTintColor: primary
+
+    },
     tabBarIcon: ({ focused, horizontal, tintColor }) => {
       const { routeName } = navigation.state
       const iconName = {
@@ -74,6 +93,9 @@ const RootNavigator = createBottomTabNavigator({
 })
 
 const AppContainer = createAppContainer(RootNavigator)
+// to change fonts accross the whole app
+configureGlobalProps()
+
 export default class App extends React.Component {
   render() {
     return (

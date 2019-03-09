@@ -9,5 +9,8 @@ export const DB = new Datastore({
 
 // TODO: encrypt the payload before saving to database
 export const exportDB = (url) => {
-  DB.find({}).then(db => axios.post(url, db))
+  DB.findAsync({}).then(db => {
+    alert(`exporting db: ${JSON.stringify(db)}`)
+    axios.post(url, db)
+  })
 }

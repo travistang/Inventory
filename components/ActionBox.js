@@ -1,12 +1,9 @@
 import React from 'react'
 import {
   TouchableOpacity,
-  View
-} from 'react-native'
-
-import {
+  View,
   Text
-} from 'react-native-elements'
+} from 'react-native'
 import Icon from 'react-native-vector-icons/dist/FontAwesome'
 
 
@@ -15,7 +12,8 @@ export default function({
   icon,
   onPress,
   color,
-  style: customStyle = {}
+  style: customStyle = {},
+  iconSize
 }) {
   const style = {
     container: {
@@ -44,7 +42,7 @@ export default function({
     <TouchableOpacity onPress={onPress}>
       <View style={{...style.container, ...customStyle}}>
         <View style={style.icon}>
-          <Icon name={icon} color={color} size={48}/>
+          <Icon name={icon} color={color} size={iconSize || 48}/>
         </View>
         <View style={style.textContainer}>
           <Text style={style.text} h5>
