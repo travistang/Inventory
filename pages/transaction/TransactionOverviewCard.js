@@ -7,7 +7,7 @@ import Card from '../../components/Card'
 import {
   View, StyleSheet
 } from 'react-native'
-import { colors } from '../../theme'
+import { colors, colorForType } from '../../theme'
 import {
   Badge, Text
 } from 'react-native-elements'
@@ -62,42 +62,23 @@ export default class TransactionCard extends React.Component {
       }).isRequired,
     containerStyle: PropTypes.object
   }
-  getLeftContainer({ name, date, type }) {
-    return (
-      <View style={style.subContainer}>
-        <View style={style.subsubContainer}>
-          <Text style={style.name}>
-            {name}
-          </Text>
-        </View>
-        <View style={style.subsubContainer}>
-          <Text style={style.date}>
-            {moment(date).format("DD/MM/YYYY HH:mm")}
-          </Text>
-        </View>
-      </View>
-    )
-  }
-  /*
-    The right part of a transaction card.
-    This depends on the type of the transaction
-  */
-  getRightContainer({
-    from, to, items, type,
+  getLeftContainer({
+    name, date, items, type,
     consumedAmount, obtainedAmount,
   }) {
+    const {
+      fromAccount, toAccount
+    } = this.state
+
+    const fromCurrency = fromAccount && fromAccount.currency || ""
+    const toCurrency = toAccount && toAccount.currency || ""
+    const numItems = items && items.length || 0
+    let content = null
+    // get currency info of the accounts involved in this transaction
     const {
       BUY, TRANSFER, CRAFT,
       SELL, INCOME, CONSUME, SPEND
     } = Transactions.TransactionTypes
-    let content
-    // get currency info of the accounts involved in this transaction
-    const {
-      fromAccount, toAccount
-    } = this.state
-    const fromCurrency = fromAccount && fromAccount.currency || ""
-    const toCurrency = toAccount && toAccount.currency || ""
-    const numItems = items && items.length || 0
     switch(type) {
       case BUY:
         content = (
@@ -126,12 +107,44 @@ export default class TransactionCard extends React.Component {
         break
     }
     return (
-      <View style={{...style.subContainer}}>
-        <View style={{...style.subsubContainer, ...style.rightContainer}}>
-          <Badge value={type} />
+      <View style={style.subContainer}>
+        <View style={style.subsubContainer}>
+          <Text style={style.name}>
+            {name}
+          </Text>
         </View>
-        <View style={{...style.subsubContainer, ...style.rightContainer}}>
+        <View style={style.subsubContainer}>
           {content}
+        </View>
+      </View>
+    )
+  }
+  /*
+    The right part of a transaction card.
+    This depends on the type of the transaction
+  */
+  getRightContainer({
+    from, to, items, type,
+    consumedAmount, obtainedAmount,
+  }) {
+    const {
+      BUY, TRANSFER, CRAFT,
+      SELL, INCOME, CONSUME, SPEND
+    } = Transactions.TransactionTypes
+
+    return (
+      <View style={{...style.subContainer}}>
+        <View style={{
+            ...style.subsubContainer,
+            ...style.rightContainer
+        }}>
+          <Text style={{
+              ...style.typeBadge,
+              backgroundColor: colorForType(type),
+              color: white
+          }}>
+              {type}
+          </Text>
         </View>
       </View>
     )
@@ -174,7 +187,9 @@ export default class TransactionCard extends React.Component {
       <Card style={style.card}>
         <View style={style.container}>
           {this.getLeftContainer({
-            name, date, type
+            name, date, type,
+            from, to, items,
+            consumedAmount, obtainedAmount
           })}
           {
             this.getRightContainer({
@@ -192,6 +207,12 @@ const {
   primary, danger,
   white } = colors
 const style = StyleSheet.create({
+  typeBadge: {
+    borderRadius: 4,
+    paddingHorizontal: 4,
+    width: 96,
+    textAlign: 'center'
+  },
   card: {
     margin: 16,
   },
@@ -214,11 +235,6 @@ const style = StyleSheet.create({
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    alignItems: 'center'
-  },
-  transferContainer: {
-    display: 'flex',
-    justifyContent: 'space-around',
     alignItems: 'center'
   },
   name: {

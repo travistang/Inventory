@@ -22,6 +22,7 @@
     "react-native-globalize": "^2.3.0",
     "react-native-local-mongodb": "^2.2.5",
     "react-native-responsive-linechart": "^1.5.0",
+    "react-native-sparkline": "^1.0.5-beta",
     "react-native-svg": "^9.2.4",
     "react-native-svg-charts": "^5.2.0",
     "react-native-vector-icons": "^6.2.0",
@@ -41,6 +42,8 @@
     "preset": "react-native"
   },
   "rnpm": {
-     "assets": ["assets/fonts/Raleway"]
+    "assets": [
+      "assets/fonts/Raleway"
+    ]
   }
 }

@@ -1,4 +1,5 @@
 import { setCustomText } from 'react-native-global-props'
+import { Transactions } from './models/transaction'
 
 export const configureGlobalProps = () => {
   setCustomText({
@@ -36,4 +37,26 @@ export const colors = {
   secondary: rgbToHex(57,104,255),
   danger: rgbToHex(255,89,63),
   info: rgbToHex(126,117,140),
+}
+
+export const colorForType = (type) => {
+  const {
+    BUY, TRANSFER, CRAFT,
+    SELL, INCOME, CONSUME, SPEND
+  } = Transactions.TransactionTypes
+  const {
+    textPrimary, textSecondary,
+    primary, secondary, danger, info, white, background
+  } = colors
+  switch(type) {
+    case BUY:
+    case SPEND:
+      return danger
+    case TRANSFER:
+      return info
+    case INCOME:
+      return secondary
+    default:
+      return textSecondary
+  }
 }

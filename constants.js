@@ -6,3 +6,5 @@ import * as Qty from 'js-quantities'
 //   .reduce((res, units) => ([...res, ...units]))
 
 export const recognizedUnits = "pieces,kg,g,mg,mL,L,cm,m".split(',')
+
+export const serverURL = "http://localhost:3999"

@@ -6,6 +6,9 @@ import { Text } from 'react-native-elements'
 import LineChart from "react-native-responsive-linechart"
 import PropTypes from 'prop-types'
 import TransactionModel from '../models/transaction'
+import Sparkline from 'react-native-sparkline'
+import {colors} from '../theme'
+const { primary, danger } = colors
 
 // given an account instance, render a trend line
 export default class AccountTrendLine extends React.Component {
@@ -70,16 +73,24 @@ export default class AccountTrendLine extends React.Component {
         </View>
       )
     }
+    /*
+    <LineChart
+      data={data}
+      config={this.config}
+      style={style.chart}
+    />
+    */
     return (
       <TouchableOpacity
         disabled={!onPress}
         onPress={onPress}
         style={style.container}>
-        <LineChart
-          data={data}
-          config={this.config}
-          style={style.chart}
-        />
+        <Sparkline
+          color={primary}
+          data={data}>
+          <Sparkline.Line />
+          <Sparkline.Fill />
+        </Sparkline>
       </TouchableOpacity>
     )
   }

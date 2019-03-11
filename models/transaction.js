@@ -79,11 +79,15 @@ export class Transactions {
         Yup.object().shape({
           name: Yup.string().required("Item name required"),
           amount: Yup.number().moreThan(0).required("Item amount required"),
-          cost: Yup.number().min(0)
+          cost: Yup.number().min(0),
+          // info that help understanding the changes in amount of this item
+          originalAmount: Yup.number().moreThan(0),
+          unit: Yup.string()
         })
       ).when("transactionType", {
           is: type => ([
               TransactionTypes.CONSUME,
+              TransactionType.BUY,
               TransactionTypes.CRAFT
             ].indexOf(type) > -1),
           then: Yup.array().required()
@@ -176,10 +180,19 @@ export class Transactions {
   }) {
     // for each item, record the consumption
     // everything is the same, except the amount takes a negative sign as this is a consumption transaction
-    await Promise.all(
+    items = await Promise.all(
       items.map(item =>
         ({...item, amount: -item.amount})
-      ).map(ItemModel.add.bind(ItemModel))
+      ).map( async (item, i) => {
+        const result = await ItemModel.add(item)
+        return ({
+          ...item,
+          // because it is turned to negative, so turn it back to positive again
+          amount: -item.amount,
+          originalAmount: result.amount - item.amount,
+          unit: result.unit
+        })
+      })
     )
     const { CONSUME } = Transactions.TransactionTypes
     // then add the transaction record
@@ -341,7 +354,9 @@ export class Transactions {
           Yup.object().shape({
             name: Yup.string().required(),
             amount: Yup.number().moreThan(0).required(),
-            cost: Yup.number().min(0).required()
+            cost: Yup.number().min(0).required(),
+            originalAmount: Yup.number().moreThan(0),
+            unit: Yup.string()
           })
         ),
         name: Yup.string().required(),
@@ -368,9 +383,11 @@ export class Transactions {
 
     // add all items
     let canAddSuccessfully = true
-    items.forEach(async itemChange => {
+
+    items.forEach(async function(itemChange, i) {
       let result = await ItemModel.add(itemChange)
-      if(!result) canAddSuccessfully = false
+      this[i].originalAmount = result.amount - itemChange.amount
+      this[i].unit = result.unit
     })
 
     return await this.addTransactionRecord({

@@ -8,7 +8,7 @@ import {
 // import {
 //   Text
 // } from 'react-native-elements'
-import { colors } from '../../theme'
+import { colors, colorForType } from '../../theme'
 import { TransactionPropTypes, FormatCurrency } from '../../utils'
 import { Transactions } from '../../models/transaction'
 import AccountModel from '../../models/account'
@@ -169,8 +169,11 @@ class DetailsHeaderSection extends React.Component {
     return content
   }
   render() {
+    const { transactionType: type } = this.props.transaction
     return (
-      <View style={style.container}>
+      <View style={{
+          ...style.container,
+          backgroundColor: colorForType(type)}}>
         <View style={style.centerRow}>
           <Text style={style.quantityDescription}>
             {this.getQuantityDescription()}
@@ -187,7 +190,7 @@ class DetailsHeaderSection extends React.Component {
 }
 
 export default withNavigation(DetailsHeaderSection)
-const textColor = textPrimary
+const textColor = white
 const {
   danger, primary, textPrimary,
   textSecondary, white, background,
@@ -197,7 +200,6 @@ const style = StyleSheet.create({
   container: {
     height: 160,
     display: 'flex',
-    backgroundColor: background,
     color: textColor,
   },
   centerRow: {
@@ -237,7 +239,8 @@ const style = StyleSheet.create({
   smallText: {
     display: 'flex',
     justifyContent: 'flex-end',
-    alignItems: 'flex-end'
+    alignItems: 'flex-end',
+    color: textColor
   },
   text: {
     color: textColor,
@@ -252,7 +255,6 @@ const style = StyleSheet.create({
     fontWeight: 'bold'
   },
   accountAmount: {
-    color: secondary,
     fontWeight: 'bold'
   }
 })
