@@ -9,9 +9,13 @@ const style = StyleSheet.create({
     backgroundColor: background
   }
 })
-export default function({children, ...props}) {
+export default function({
+  children,
+  style: customStyle = {},
+  ...props
+}) {
   return (
-    <ScrollView {...props} style={style.container}>
+    <ScrollView {...props} style={{...style.container, ...customStyle}}>
       {children}
     </ScrollView>
   )

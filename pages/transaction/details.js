@@ -17,7 +17,7 @@ import { withNavigation } from 'react-navigation'
 import HeaderComponent from '../../components/HeaderComponent'
 import { colors , colorForType } from '../../theme'
 import Icon from 'react-native-vector-icons/dist/FontAwesome'
-import TagCard from '../../components/TagCard'
+import ItemCard from '../../components/ItemCard'
 const {
   CONSUME, SELL, BUY
 } = Transactions.TransactionTypes
@@ -59,37 +59,9 @@ class TransactionDetailsPage extends React.Component {
         return (
           <View style={style.consumeItemListContainer}>
             {
-              items.map((item) => {
-                const {name: itemName, amount} = item
-                return (
-                  <TouchableOpacity
-                    key={itemName}
-                    style={style.consumeItemContainer}
-                  >
-                    <TagCard
-                      config={{containerHeight: 72}}
-                      virtualContainerStyle={style.consumeTagCardVirtualElement}
-                      mainElement={(
-                        <View style={style.consumeTagCardMainElement}>
-                          <Text
-                            style={style.consumeMainCardText}>
-                            {itemName}
-                          </Text>
-                        </View>
-
-                      )}
-                    tagElement={(
-                      <View style={style.consumeTagCardTagElement}>
-                        <Text style={style.consumeTagCardText}>
-                          {FormatItemAmount(amount, item)}
-                        </Text>
-                      </View>
-                    )}
-                    />
-                  </TouchableOpacity>
-
-                )
-              })
+              items.map((item) => (
+                <ItemCard key={item.name} item={item} />
+              ))
             }
           </View>
         )
@@ -176,34 +148,7 @@ const style = StyleSheet.create({
   mainContainer: {
     marginHorizontal: 16,
   },
-  consumeItemContainer: {
-    width: '45%'
-  },
-  consumeTagCardMainElement: {
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-  },
-  consumeTagCardVirtualElement: {
-    marginHorizontal: 4
-  },
-  consumeTagCardTagElement: {
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: primary,
-    paddingHorizontal: 4,
-    borderRadius: 8,
-  },
-  consumeMainCardText: {
-    // fontSize: 24,
-    width: '100%'
-  },
-  consumeTagCardText: {
-    // fontSize: 36
-    color: white
-  },
+
   subSectionHeaderText: {
     // fontSize: 26,
     textAlign: 'center'

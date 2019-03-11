@@ -15,23 +15,22 @@ import Icon from 'react-native-vector-icons/dist/FontAwesome'
 import ItemCard from '../../components/ItemCard'
 import ItemModel from '../../models/items'
 import CenterNotice from '../../components/CenterNotice'
+import Background from '../../components/Background'
+import HeaderComponent from '../../components/HeaderComponent'
+import {
+  CommonHeaderStyle
+} from '../../utils'
 
 export default class ItemPage extends React.Component {
   static navigationOptions = ({navigation}) => {
     const { params = {} } = navigation.state
     return {
+      headerStyle: CommonHeaderStyle,
       headerTitle: (
-        <View style={{
-            marginLeft: 16,
-            flexDirection: 'row', alignItems: 'center'}}>
-          <Icon name="gift" size={22} />
-          <Text> {' '} </Text>
-          <View>
-            <Text>
-              ITEMS
-            </Text>
-          </View>
-        </View>
+        <HeaderComponent
+          title="items"
+          icon="gift"
+        />
       ),
       headerRight: (
         <Button
@@ -64,7 +63,7 @@ export default class ItemPage extends React.Component {
   render() {
     const { items } = this.state
     return (
-      <ScrollView
+      <Background
         refreshControl={
           <RefreshControl
             refreshing={this.state.refreshing}
@@ -74,30 +73,32 @@ export default class ItemPage extends React.Component {
         style={style.container}
       >
       {
-        !(items.length) && (
+        (items.length)?(
+          <View style={style.innerContainer}>
+            {
+              items.map(item => (
+                <ItemCard key={item.name} item={item} />
+              ))
+            }
+          </View>
+        ):(
           <CenterNotice
             title="You have no items"
             subtitle="Click on the '+' button to add one."
           />
         )
       }
-      {
-        items.map(item => (
-          <ItemCard item={item}
-            onClick={() => this.toItemPage(item)}
-          />
-        ))
-      }
 
-      </ScrollView>
+    </Background>
     )
   }
 }
 
 const style = StyleSheet.create({
-  container: {
-    flex: 1,
+  innerContainer: {
     display: 'flex',
-    flexDirection:'column',
+    flexDirection:'row',
+    flexWrap: 'wrap',
+    margin: 16
   }
 })

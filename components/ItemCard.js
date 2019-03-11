@@ -1,40 +1,76 @@
 import React from 'react'
 import {
-  View, StyleSheet,
+  View, StyleSheet, Text,
   TouchableOpacity
 } from 'react-native'
-
-import {
-  Button, Card,
-  Text,
-} from 'react-native-elements'
+import { FormatItemAmount } from '../utils'
+import TagCard from './TagCard'
+import { colors } from '../theme'
+const {
+  primary, white
+} = colors
 
 const style = StyleSheet.create({
-  cardContainer: {
-
+  consumeItemContainer: {
+    width: '45%'
   },
-  surplus: {
-    color: 'green',
-    fontSize: 32
-  }
+  consumeTagCardMainElement: {
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+  },
+  consumeTagCardVirtualElement: {
+    marginHorizontal: 4
+  },
+  consumeTagCardTagElement: {
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: primary,
+    paddingHorizontal: 4,
+    borderRadius: 8,
+  },
+  consumeMainCardText: {
+    // fontSize: 24,
+    width: '100%'
+  },
+  consumeTagCardText: {
+    // fontSize: 36
+    color: white
+  },
 })
 export default function({
-  item: { name, amount, unit },
+  item,
   style: customStyle = {},
-  onClick
+  onPress
 }) {
+  const { name: itemName, amount } = item
   return (
     <TouchableOpacity
-      style={customStyle}
-      onPress={onClick}>
-      <Card
-        title={name}>
-        <View style={style.cardContainer}>
-          <Text style={style.surplus}>
-            {`${amount} ${unit}`}
-          </Text>
-        </View>
-      </Card>
+      key={itemName}
+      style={style.consumeItemContainer}
+    >
+      <TagCard
+        config={{containerHeight: 72}}
+        virtualContainerStyle={style.consumeTagCardVirtualElement}
+        mainElement={(
+          <View style={style.consumeTagCardMainElement}>
+            <Text
+              style={style.consumeMainCardText}>
+              {itemName}
+            </Text>
+          </View>
+
+        )}
+        tagElement={(
+          <View style={style.consumeTagCardTagElement}>
+            <Text style={style.consumeTagCardText}>
+              {FormatItemAmount(amount, item)}
+            </Text>
+          </View>
+        )}
+      />
     </TouchableOpacity>
 
   )

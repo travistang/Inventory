@@ -21,8 +21,6 @@ import { exportDB } from '../../models'
 import {
   CommonHeaderStyle
 } from '../../utils'
-import { colors } from '../../theme'
-const { background } = colors
 
 class TransactionPage extends React.Component {
   static navigationOptions = ({navigation}) => {
