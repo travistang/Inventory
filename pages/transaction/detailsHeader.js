@@ -190,12 +190,13 @@ class DetailsHeaderSection extends React.Component {
 }
 
 export default withNavigation(DetailsHeaderSection)
-const textColor = white
+
 const {
   danger, primary, textPrimary,
   textSecondary, white, background,
   secondary
 } = colors
+const textColor = white
 const style = StyleSheet.create({
   container: {
     height: 160,

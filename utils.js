@@ -47,3 +47,7 @@ export const TransactionPropTypes = PropTypes.shape({
     })
   )
 }).isRequired
+
+export const AccountPropTypes = PropTypes.shape({
+
+}).isRequired

@@ -1,19 +1,18 @@
 import React from 'react'
 import {
-  StyleSheet, View, TouchableOpacity
+  StyleSheet, View, TouchableOpacity,Text
 } from 'react-native'
-import { Text } from 'react-native-elements'
-import LineChart from "react-native-responsive-linechart"
 import PropTypes from 'prop-types'
 import TransactionModel from '../models/transaction'
 import Sparkline from 'react-native-sparkline'
 import {colors} from '../theme'
-const { primary, danger } = colors
+const { primary, white } = colors
 
 // given an account instance, render a trend line
 export default class AccountTrendLine extends React.Component {
   static defaultProps = {
-    numData: 5
+    numData: 5,
+    color: primary
   }
 
   static propTypes = {
@@ -21,7 +20,9 @@ export default class AccountTrendLine extends React.Component {
       _id: PropTypes.string.isRequired
     }).isRequired,
     numData: PropTypes.number,
-    onPress: PropTypes.func
+    onPress: PropTypes.func,
+    color: PropTypes.string,
+    backgroundColor: PropTypes.string,
   }
 
   constructor(props) {
@@ -31,24 +32,7 @@ export default class AccountTrendLine extends React.Component {
       data: []
     }
 
-    this.config = {
-      // interpolation: "spline",
-      line: {
-        strokeWidth: 2 ,
-        strokeColor: '#10ac84'
-      },
-      yAxis: { visible: false },
-      xAxis: {visible: false},
-      grid: { visible: false },
-      area: {
-        visible: false,
-        // gradientFrom: '#10ac84',
-        // gradientFromOpacity: 1,
-        // gradientTo: '#10ac84',
-        // gradientToOpacity: 0.4,
-      },
 
-    }
   }
   async componentDidMount() {
     await this.fetchData()
@@ -63,36 +47,47 @@ export default class AccountTrendLine extends React.Component {
   }
   render() {
     const { data } = this.state
-    const { onPress } = this.props
+    const { onPress,
+      color = primary ,
+      backgroundColor = white,
+    } = this.props
     if(data.length < 2) {
       return (
-        <View style={style.container}>
-          <Text h5 style={style.noDataText}>
+        <View style={{
+            ...style.container,
+            backgroundColor
+        }}>
+          <Text h5 style={{
+              ...style.noDataText,
+              color
+          }}>
             Not enough data to show trend
           </Text>
         </View>
       )
     }
-    /*
-    <LineChart
-      data={data}
-      config={this.config}
-      style={style.chart}
-    />
-    */
     return (
       <TouchableOpacity
         disabled={!onPress}
         onPress={onPress}
         style={style.container}>
         <Sparkline
-          color={primary}
+          min={this.getLineMinimum(data)}
+          color={color}
           data={data}>
           <Sparkline.Line />
           <Sparkline.Fill />
         </Sparkline>
       </TouchableOpacity>
     )
+  }
+  /*
+    Try to make the line staying above the half of the graph
+  */
+  getLineMinimum(data) {
+    const min = Math.min(...data)
+    const max = Math.max(...data)
+    return Math.max(min - (max - min), 0)
   }
 }
 
@@ -106,6 +101,8 @@ const style = StyleSheet.create({
     margin: 16,
     flex: 1,
     display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   noDataText: {
     textAlign: 'center'

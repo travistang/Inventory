@@ -2,59 +2,54 @@ import React from 'react'
 import {
   StyleSheet,
   View,
-  ScrollView,
   TouchableOpacity,
   RefreshControl
 } from 'react-native'
+import {
+  CommonHeaderStyle
+} from '../../utils'
 import AddAccountOverlay from './addAccountOverlay'
 import {
   Text,
   Button
 } from 'react-native-elements'
+import HeaderComponent from '../../components/HeaderComponent'
+import Background from '../../components/Background'
 import { StackActions } from 'react-navigation'
-import AccountCard from './AccountCard'
+import AccountCard from '../../components/AccountCard'
 import Icon from 'react-native-vector-icons/dist/FontAwesome'
 import AccountModel from '../../models/account'
-
+import { colors } from '../../theme'
+const { textSecondary } = colors
 export default class AccountPage extends React.Component {
 
   static navigationOptions = ({navigation}) => {
     const {params = {}} = navigation.state
     return {
-      // header: {
-      headerTitle:(
-        <View style={{
-            marginLeft: 16,
-            flexDirection: 'row', alignItems: 'center'}}>
-          <Icon name="bank" size={22} />
-          <Text> {' '} </Text>
-          <TouchableOpacity
-            onPress={
-              AccountModel.removeAllAccounts.bind(AccountModel)
-            }
-          >
-            <Text>
-              ACCOUNT
-            </Text>
-          </TouchableOpacity>
-        </View>
-      ),
-      // headerStyle: {justifyContent: 'center'},
-      headerTitleStyle: {
-        // fontWeight: 500,
-        alignSelf: 'center',
-        textAlign: 'center'
-      },
-      //onPress={navigation.params.openAddAccountView}
-      headerRight: (
-        <Button
-          type="clear"
-          onPress={params.openAddAccountView}
-          icon={{name: "add"}}
-        />
-      )
+          headerStyle: CommonHeaderStyle,
+          headerTintColor: textSecondary,
+          headerTitle: (
+            <TouchableOpacity
+              onPress={
+                AccountModel.removeAllAccounts.bind(AccountModel)
+              }
+            >
+              <HeaderComponent
+                title="Accounts"
+                icon="exchange"
+              />
+            </TouchableOpacity>
+          ),
+          headerRight: (
+            <Button
+              type="clear"
+              onPress={params.openAddAccountView}
+              icon={{name: "add"}}
+            />
+          )
+      }
     }
-  }
+
 
   loadAccountList() {
     this.setState({
@@ -97,7 +92,7 @@ export default class AccountPage extends React.Component {
       accountViewOpened: true
     })
   }
-  
+
   closeAddAccountView() {
     this.setState({
       accountViewOpened: false
@@ -107,7 +102,7 @@ export default class AccountPage extends React.Component {
 
   render() {
     return (
-      <ScrollView
+      <Background
         refreshControl={
           <RefreshControl
             refreshing={this.state.refreshing}
@@ -128,7 +123,7 @@ export default class AccountPage extends React.Component {
             />
           ))
         }
-      </ScrollView>
+      </Background>
     )
   }
 }

@@ -55,12 +55,15 @@ class TransactionDetailsPage extends React.Component {
   getMainContent(transaction) {
     const { name, items, from, to, transactionType } = transaction
     switch(transactionType) {
+      case BUY:
       case CONSUME:
         return (
           <View style={style.consumeItemListContainer}>
             {
               items.map((item) => (
-                <ItemCard key={item.name} item={item} />
+                <ItemCard
+                  tagColor={(transactionType == CONSUME)?secondary:primary}
+                  key={item.name} item={item} />
               ))
             }
           </View>

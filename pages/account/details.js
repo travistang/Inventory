@@ -6,7 +6,11 @@ import {
   Overlay,
   Text
 } from 'react-native-elements'
-
+import {
+  CommonHeaderStyle
+} from '../../utils'
+import HeaderComponent from '../../components/HeaderComponent'
+import Background from '../../components/Background'
 import {
   ScrollView,
   RefreshControl,
@@ -23,13 +27,22 @@ import Icon from 'react-native-vector-icons/dist/FontAwesome'
 import { FormatCurrency } from '../../utils'
 import ActionBox from '../../components/ActionBox'
 import AccountTrendLine from '../../components/AccountTrendLine'
-
-import LineChart from 'react-native-responsive-linechart'
-
+import DetailsHeader from './detailsHeader'
+import { Transactions } from '../../models/transaction'
+import { colors } from '../../theme'
+const { textSecondary, secondary, white } = colors
+const themeColor = secondary
 export default class AccountDetailsPage extends React.Component {
   static navigationOptions = ({navigation}) => {
     const account = navigation.getParam('account')
     if(!account) return {}
+    return {
+          headerStyle: {
+            ...CommonHeaderStyle,
+            backgroundColor: themeColor
+          },
+          headerTintColor: white,
+      }
     return {
       headerTitle: account.name,
     }
@@ -168,7 +181,6 @@ export default class AccountDetailsPage extends React.Component {
       })
     }
   }
-
   render() {
     const {
       transactions,
@@ -180,20 +192,8 @@ export default class AccountDetailsPage extends React.Component {
     const { amount, currency } = account
 
     return (
-      <ScrollView>
-        {/* Summary component, which is not in a card*/}
-        <View style={style.summary}>
-          <View style={style.monetary}>
-            <Text h3 style={style.monetaryText}>
-              {FormatCurrency(amount, currency)}
-            </Text>
-          </View>
-          <View style={style.trendContainer}>
-            <AccountTrendLine
-              account={account} numData={20}
-            />
-          </View>
-        </View>
+      <Background>
+        <DetailsHeader account={account} />
 
         <Card title="Actions">
           {
@@ -201,12 +201,15 @@ export default class AccountDetailsPage extends React.Component {
           }
         </Card>
 
-      </ScrollView>
+      </Background>
     )
   }
 }
 
 const style = StyleSheet.create({
+  header: {
+    backgroundColor: secondary
+  },
   buttonGroup: {
     flexDirection: 'row',
     marginVertical: 8,

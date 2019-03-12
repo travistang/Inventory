@@ -27,7 +27,6 @@ const style = StyleSheet.create({
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: primary,
     paddingHorizontal: 4,
     borderRadius: 8,
   },
@@ -42,6 +41,7 @@ const style = StyleSheet.create({
 })
 export default function({
   item,
+  tagColor = primary,
   style: customStyle = {},
   onPress
 }) {
@@ -49,7 +49,10 @@ export default function({
   return (
     <TouchableOpacity
       key={itemName}
-      style={style.consumeItemContainer}
+      style={{
+        ...style.consumeItemContainer,
+        ...customStyle
+      }}
     >
       <TagCard
         config={{containerHeight: 72}}
@@ -64,7 +67,10 @@ export default function({
 
         )}
         tagElement={(
-          <View style={style.consumeTagCardTagElement}>
+          <View style={{
+              ...style.consumeTagCardTagElement,
+              backgroundColor: tagColor
+            }}>
             <Text style={style.consumeTagCardText}>
               {FormatItemAmount(amount, item)}
             </Text>

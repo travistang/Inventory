@@ -13,8 +13,10 @@ const { white, textPrimary, primary } = colors
 export default function({
   mainElement,
   tagElement,
+  leftTagElement,
   virtualContainerStyle = {},
   containerStyle = {},
+  bottomVirtualContainerStyle = {},
   tagStyle = {},
   config: customConfig = {}
 }) {
@@ -78,7 +80,11 @@ export default function({
           {mainElement}
       </View>
       <View style={style.lowerVirtualContainer}>
-        <View style={style.lowerVirtualLeftContainer}>
+        <View style={{
+          ...style.lowerVirtualLeftContainer,
+          ...bottomVirtualContainerStyle
+        }}>
+          {leftTagElement}
         </View>
         <View style={{
           ...style.tagContainer,

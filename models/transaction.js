@@ -386,6 +386,7 @@ export class Transactions {
 
     items.forEach(async function(itemChange, i) {
       let result = await ItemModel.add(itemChange)
+      alert(`buy: ${JSON.stringify(this)}`)
       this[i].originalAmount = result.amount - itemChange.amount
       this[i].unit = result.unit
     })
