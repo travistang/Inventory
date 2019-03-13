@@ -23,6 +23,8 @@ export default class AccountTrendLine extends React.Component {
     onPress: PropTypes.func,
     color: PropTypes.string,
     backgroundColor: PropTypes.string,
+    // a little hack here, but well..., just a little.
+    onSurplusRangeCalculated: PropTypes.func
   }
 
   constructor(props) {
@@ -44,6 +46,17 @@ export default class AccountTrendLine extends React.Component {
     const data =
       await TransactionModel.getAccountRecentBalance({accountId, numData})
     this.setState({ data })
+
+    // report the minimum and maximum amount of the surplus, if a callback is given
+    const { onSurplusRangeCalculated } = this.props
+    if(onSurplusRangeCalculated) {
+      const min = Math.min(...data)
+      const max = Math.max(...data)
+      onSurplusRangeCalculated({
+        min, max
+      })
+    }
+
   }
   render() {
     const { data } = this.state

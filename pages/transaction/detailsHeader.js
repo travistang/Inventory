@@ -223,7 +223,7 @@ const style = StyleSheet.create({
   quantity: {
     color: textColor,
     flex: 1,
-    fontSize: 64,
+    fontSize: 36,
     textAlign: 'center',
   },
   bigNumberSmallText: {
@@ -233,7 +233,7 @@ const style = StyleSheet.create({
     justifyContent: 'center'
   },
   bigNumber: {
-    fontSize: 64,
+    fontSize: 36,
     color: textColor,
     marginRight: 8
   },

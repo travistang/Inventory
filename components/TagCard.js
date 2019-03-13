@@ -5,7 +5,7 @@ import {
   StyleSheet
 } from 'react-native'
 import Icon from 'react-native-vector-icons/dist/FontAwesome'
-import { colors } from '../theme'
+import { colors, shadow } from '../theme'
 // some values regarding the tag card to tune
 
 const { white, textPrimary, primary } = colors
@@ -50,14 +50,7 @@ export default function({
       backgroundColor: white,
       zIndex: 10,
       // box shadow generator
-      shadowColor: "#000",
-      shadowOffset: {
-      	width: 0,
-      	height: 2,
-      },
-      shadowOpacity: 0.25,
-      shadowRadius: 3.84,
-      elevation: 5,
+      ...shadow,
     },
     lowerVirtualContainer: {
       display: 'flex',

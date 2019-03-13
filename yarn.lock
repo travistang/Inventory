@@ -5269,11 +5269,10 @@ react-native-branch@2.2.5:
   version "2.2.5"
   resolved "https://registry.yarnpkg.com/react-native-branch/-/react-native-branch-2.2.5.tgz#4074dd63b4973e6397d9ce50e97b57c77a518e9d"
 
-react-native-chart-kit@^2.2.1:
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/react-native-chart-kit/-/react-native-chart-kit-2.2.1.tgz#3c6d219d8821246c929ffba379d442fc46cb4e43"
+react-native-chart-kit@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/react-native-chart-kit/-/react-native-chart-kit-2.3.0.tgz#0803bf43c6d744bfa8647ab17d58704e0a8118ac"
   dependencies:
-    babel-plugin-module-resolver "^3.1.1"
     lodash "^4.17.11"
     paths-js "^0.4.7"
     point-in-polygon "^1.0.1"
@@ -5305,6 +5304,10 @@ react-native-gesture-handler@^1.0.15, react-native-gesture-handler@~1.0.14:
     hoist-non-react-statics "^2.3.1"
     invariant "^2.2.2"
     prop-types "^15.5.10"
+
+react-native-global-props@^1.1.5:
+  version "1.1.5"
+  resolved "https://registry.yarnpkg.com/react-native-global-props/-/react-native-global-props-1.1.5.tgz#443e0ffc89d5402fa20ebedf37bcbca6d861c34d"
 
 react-native-globalize@^2.3.0:
   version "2.3.0"
@@ -5370,6 +5373,10 @@ react-native-screens@1.0.0-alpha.15:
 "react-native-screens@^1.0.0 || ^1.0.0-alpha":
   version "1.0.0-alpha.22"
   resolved "https://registry.yarnpkg.com/react-native-screens/-/react-native-screens-1.0.0-alpha.22.tgz#7a120377b52aa9bbb94d0b8541a014026be9289b"
+
+react-native-sparkline@^1.0.5-beta:
+  version "1.0.5-beta"
+  resolved "https://registry.yarnpkg.com/react-native-sparkline/-/react-native-sparkline-1.0.5-beta.tgz#30502aa959f86616b3d458214f85baff5beeec4c"
 
 react-native-status-bar-height@^2.2.0:
   version "2.2.0"

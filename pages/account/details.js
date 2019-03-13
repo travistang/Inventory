@@ -1,13 +1,11 @@
 import React from 'react'
 import {
-  Button,
-  Card,
   ListItem,
   Overlay,
-  Text
 } from 'react-native-elements'
 import {
-  CommonHeaderStyle
+  CommonHeaderStyle,
+  addOpacity
 } from '../../utils'
 import HeaderComponent from '../../components/HeaderComponent'
 import Background from '../../components/Background'
@@ -15,7 +13,8 @@ import {
   ScrollView,
   RefreshControl,
   StyleSheet,
-  View, TouchableOpacity
+  View, TouchableOpacity,
+  Dimensions, Text
 } from 'react-native'
 import CenterNotice from '../../components/CenterNotice'
 import * as _ from 'lodash'
@@ -29,9 +28,14 @@ import ActionBox from '../../components/ActionBox'
 import AccountTrendLine from '../../components/AccountTrendLine'
 import DetailsHeader from './detailsHeader'
 import { Transactions } from '../../models/transaction'
-import { colors } from '../../theme'
+import { colors, shadow } from '../../theme'
+import { ContributionGraph } from 'react-native-chart-kit'
+
+import moment from 'moment'
+
 const { textSecondary, secondary, white } = colors
 const themeColor = secondary
+
 export default class AccountDetailsPage extends React.Component {
   static navigationOptions = ({navigation}) => {
     const account = navigation.getParam('account')
@@ -42,10 +46,15 @@ export default class AccountDetailsPage extends React.Component {
             backgroundColor: themeColor
           },
           headerTintColor: white,
+          headerRight: (
+            <TouchableOpacity
+              style={style.headerRight}
+              onPress={() => navigation.navigate('', { account })}
+            >
+              <Icon name="exchange" size={22} color={white}/>
+            </TouchableOpacity>
+          )
       }
-    return {
-      headerTitle: account.name,
-    }
   }
   static propTypes = {
     navigation: PropTypes.object.isRequired,
@@ -55,11 +64,18 @@ export default class AccountDetailsPage extends React.Component {
     super(props)
     this.state = {
       transactions: [],
-      account: null
+      account: null,
+      graphWidth: Dimensions.get('window').width,
+      // referring to surplus of the account
+      min: 0,
+      max: 0
     }
     props.navigation.addListener('didFocus',
       this.componentDidFocus.bind(this)
     )
+  }
+  onSurplusRangeCalculated({min, max}) {
+    this.setState({ min, max })
   }
   componentDidFocus() {
     this.reloadAccountInfo()
@@ -114,45 +130,31 @@ export default class AccountDetailsPage extends React.Component {
       account: this.state.account
     })
   }
-  buttonGroup() {
-    return (
-      <View style={style.buttonGroup}>
-        <View style={style.buttonGroupItem}>
-          <ActionBox
-            icon="money"
-            text="Income"
-            onPress={this.addIncome.bind(this)}
-            color="green"
-          />
-        </View>
-        <View style={style.buttonGroupItem}>
-          <ActionBox
-            icon="exchange"
-            text="Transfer"
-            onPress={this.addTransfer.bind(this)}
-            color="brown"
-          />
-        </View>
-        <View style={style.buttonGroupItem}>
-          <ActionBox
-            icon="fire"
-            text="Spend"
-            onPress={this.addSpend.bind(this)}
-            color="red"
-          />
-
-        </View>
-        <View style={style.buttonGroupItem}>
-          <ActionBox
-            icon="shopping-cart"
-            text="Buy"
-            onPress={this.buy.bind(this)}
-            color="grey"
-          />
-        </View>
-      </View>
-    )
+  getAccountActions() {
+    return [
+      {
+        icon: 'money',
+        title: 'Income',
+        onPress: this.addIncome.bind(this)
+      },
+      {
+        icon: 'exchange',
+        title: 'Transfer',
+        onPress: this.addTransfer.bind(this)
+      },
+      {
+        icon: 'fire',
+        title: 'Spend',
+        onPress: this.addSpend.bind(this)
+      },
+      {
+        icon: 'shopping-cart',
+        title: 'Buy',
+        onPress: this.buy.bind(this)
+      },
+    ]
   }
+
   getCurrencyStyle(amount) {
     let color = 'gray'
     if(amount < 0) color = 'red'
@@ -181,6 +183,102 @@ export default class AccountDetailsPage extends React.Component {
       })
     }
   }
+  cardHeader({ title, icon}) {
+    return (
+      <View style={style.sectionCardHeader}>
+        <Icon name={icon} size={16} />
+        <View style={style.sectionCardHeaderTextContainer}>
+          <Text style={style.sectionCardHeaderText}>
+            {title.toUpperCase()}
+          </Text>
+        </View>
+      </View>
+    )
+  }
+  surplusTrendCard() {
+    const { min, max } = this.state
+    return (
+      <View style={style.sectionCard}>
+        {this.cardHeader({
+          title: "surplus trend",
+          icon: "arrow-up"
+        })}
+        <AccountTrendLine
+          width="100%"
+          color={secondary}
+          account={this.state.account}
+          onSurplusRangeCalculated={
+            this.onSurplusRangeCalculated.bind(this)
+          }
+        />
+        <View style={style.trendBottom}>
+          <View style={style.trendBottomText}>
+            <Text>MIN</Text>
+            <Text>{' '}</Text>
+            <Text>{min}</Text>
+          </View>
+          <View style={style.trendBottomText}>
+            <Text>MAX</Text>
+            <Text>{' '}</Text>
+            <Text>{max}</Text>
+          </View>
+        </View>
+      </View>
+    )
+  }
+
+  transactionHeatmapCard() {
+    // convert transactions involving this account to list of date string
+    const count = this.state.transactions.map(
+      trans => moment(trans.date).format('YYYY-MM-DD')
+    )
+    // reduce date string to an array of {dateString: frequencies}
+    .reduce((data, dateString) =>
+      ({
+        ...data,
+        [dateString]: (data.dateString || 0) + 1
+      }), {})
+    const data = Object.keys(count).map(dateString => ({
+      date: dateString,
+      count: count[dateString]
+    }))
+    const reportInnerWidth = ({ nativeEvent: { layout: { width }}}) => {
+      this.setState({
+        graphWidth: width // compensate padding
+      })
+    }
+    /*
+    chartConfig={{
+      backgroundColor: white,
+      color: (opacity = 1) => addOpacity(secondary, opacity)
+    }}
+    */
+    return (
+      <View
+        onLayout={reportInnerWidth.bind(this)}
+        style={style.sectionCard}>
+        {this.cardHeader({
+          title: "Transaction frequencies",
+          icon: "exchange"
+        })}
+        <ContributionGraph
+          values={data}
+          endDate={new Date()}
+          numDays={90}
+          width={this.state.graphWidth}
+          height={196}
+          style={{transform: [{translateX: -16}]}}
+          chartConfig={{
+            backgroundColor: white,
+            backgroundGradientFrom: white,
+            backgroundGradientTo: white,
+            color: (opacity = 1) => addOpacity(secondary, opacity)
+          }}
+        />
+
+      </View>
+    )
+  }
   render() {
     const {
       transactions,
@@ -193,22 +291,40 @@ export default class AccountDetailsPage extends React.Component {
 
     return (
       <Background>
-        <DetailsHeader account={account} />
-
-        <Card title="Actions">
-          {
-            this.buttonGroup()
-          }
-        </Card>
-
+        <DetailsHeader
+          actions={this.getAccountActions()}
+          account={account} />
+        <View style={style.mainContainer}>
+          {this.surplusTrendCard()}
+          {this.transactionHeatmapCard()}
+        </View>
       </Background>
     )
   }
 }
 
 const style = StyleSheet.create({
+  headerRight: {
+    marginRight: 16
+  },
+  sectionCardHeader: {
+    flexDirection: 'row'
+  },
+  sectionCardHeaderTextContainer: {
+    marginLeft: 4,
+  },
+  mainContainer: {
+    margin: 16,
+  },
   header: {
     backgroundColor: secondary
+  },
+  sectionCard: {
+    borderRadius: 16,
+    padding: 16,
+    marginVertical: 8,
+    zIndex: 2,
+    backgroundColor: white
   },
   buttonGroup: {
     flexDirection: 'row',
@@ -247,7 +363,16 @@ const style = StyleSheet.create({
   monetaryText: {
     fontWeight: 'bold'
   },
-
+  trendBottom: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  trendBottomText: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center'
+  },
   trendContainer: {
     flex: 2
   }
