@@ -140,6 +140,7 @@ export default class AccountDetailsPage extends React.Component {
       {
         icon: 'exchange',
         title: 'Transfer',
+        disabled: this.props.accountList && this.props.accountList.length,
         onPress: this.addTransfer.bind(this)
       },
       {
@@ -196,7 +197,9 @@ export default class AccountDetailsPage extends React.Component {
     )
   }
   surplusTrendCard() {
-    const { min, max } = this.state
+    const { min, max,
+      account: { currency }
+    } = this.state
     return (
       <View style={style.sectionCard}>
         {this.cardHeader({
@@ -214,13 +217,15 @@ export default class AccountDetailsPage extends React.Component {
         <View style={style.trendBottom}>
           <View style={style.trendBottomText}>
             <Text>MIN</Text>
-            <Text>{' '}</Text>
-            <Text>{min}</Text>
+            <Text style={style.trendBottomAmount}>
+              {FormatCurrency(min, currency)}
+            </Text>
           </View>
           <View style={style.trendBottomText}>
             <Text>MAX</Text>
-            <Text>{' '}</Text>
-            <Text>{max}</Text>
+            <Text style={style.trendBottomAmount}>
+              {FormatCurrency(max, currency)}
+            </Text>
           </View>
         </View>
       </View>
@@ -369,9 +374,11 @@ const style = StyleSheet.create({
     alignItems: 'center'
   },
   trendBottomText: {
-    flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center'
+  },
+  trendBottomAmount: {
+    fontWeight: '900'
   },
   trendContainer: {
     flex: 2

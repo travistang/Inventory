@@ -19,7 +19,7 @@ import Background from '../../components/Background'
 export default class BuyPage extends React.Component {
   static navigationOptions = ({ navigation }) => {
     const account = navigation.getParam('account')
-    const title = account?`buy from account ${account.name}`:"buy"
+    const title = account?`buy from account ${account.name}`:"buy items"
     return {
       headerStyle: CommonHeaderStyle,
       headerTitle: (

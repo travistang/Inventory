@@ -12,7 +12,8 @@ const { primary, white } = colors
 export default class AccountTrendLine extends React.Component {
   static defaultProps = {
     numData: 5,
-    color: primary
+    color: primary,
+    appendData: []
   }
 
   static propTypes = {
@@ -24,7 +25,8 @@ export default class AccountTrendLine extends React.Component {
     color: PropTypes.string,
     backgroundColor: PropTypes.string,
     // a little hack here, but well..., just a little.
-    onSurplusRangeCalculated: PropTypes.func
+    onSurplusRangeCalculated: PropTypes.func,
+    appendData: PropTypes.arrayOf(PropTypes.number)
   }
 
   constructor(props) {
@@ -34,6 +36,12 @@ export default class AccountTrendLine extends React.Component {
       data: []
     }
 
+
+  }
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if(this.props.account._id != prevProps.account._id) {
+      this.fetchData()
+    }
 
   }
   async componentDidMount() {
@@ -59,11 +67,17 @@ export default class AccountTrendLine extends React.Component {
 
   }
   render() {
-    const { data } = this.state
+    let { data } = this.state
     const { onPress,
       color = primary ,
+      appendData = [],
       backgroundColor = white,
     } = this.props
+    // append data for preview if there are any
+    appendData.forEach(diff => {
+      const lastData = data[data.length - 1]
+      data = data.concat(lastData + diff)
+    })
     if(data.length < 2) {
       return (
         <View style={{
@@ -100,7 +114,8 @@ export default class AccountTrendLine extends React.Component {
   getLineMinimum(data) {
     const min = Math.min(...data)
     const max = Math.max(...data)
-    return Math.max(min - (max - min), 0)
+    return min
+    // return Math.max(min - (max - min), 0)
   }
 }
 

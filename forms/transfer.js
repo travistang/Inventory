@@ -9,14 +9,22 @@ import { Formik } from 'formik'
 import {
   View,
   Picker,
-  StyleSheet
+  StyleSheet,
+  Text,
+  TouchableOpacity
 } from 'react-native'
 import {
-  Text,
   Button
 } from 'react-native-elements'
 import { FormatCurrency } from '../utils'
 import Icon from 'react-native-vector-icons/dist/FontAwesome'
+import TagCard from '../components/TagCard'
+import Background from '../components/Background'
+import Card from '../components/Card'
+import DropdownInput from '../components/DropdownInput'
+import { colors } from '../theme'
+
+const { white, textPrimary, primary, secondary } = colors
 
 const validationSchema = Yup.object().shape({
   name: Yup.string().min(10).required(),
@@ -28,7 +36,7 @@ const validationSchema = Yup.object().shape({
 
 export default function({
   accountList = [],
-  fromAccount,
+  fromAccount, // this is supposed to be an account OBJECT
   style: customStyle = {},
   onSubmit,
 }) {
@@ -45,25 +53,43 @@ export default function({
     exchangeRate: 1,
   }
   const style = {
+    transactionPreviewContainer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center'
+    },
     amountRateRow: {
       display: 'flex',
       flexDirection: 'row',
       justifyContent: 'space-around',
       alignItems: 'center'
     },
+    center: {
+      justifyContent: 'center',
+      alignItems: 'center'
+    },
+    formContainer: {
+      padding: 16
+    },
     from: {
       marginTop: 8
     },
     summary: {
-      marginTop: 8
+      margin: 8,
+      flexDirection: 'row',
+      justifyContent: 'flex-end'
+    },
+    previewCardContainerStyle: {
+      flex: 1,
+      marginHorizontal: 4
     },
     ...customStyle
   }
-  const onToAccountChange = (acc, setFieldValue) => {
+  const onAccountChange = ({ to, account, setFieldValue}) => {
     // complete to-account selection first.
-    setFieldValue('to', acc)
+    setFieldValue(to?'to':'from', account._id)
     // the first index has to be there because this is called from picker only
-    const toAccount = getAccountById(acc)
+    const toAccount = account
     if(!toAccount) return
     // calculate the exchange rate
     const exchangeRate = AccountModel.getExchangeRate({
@@ -72,8 +98,31 @@ export default function({
     })
     setFieldValue('exchangeRate', exchangeRate)
   }
-
-  // first trigger once
+  const getColorFromAmount = (amount) => {
+    if(amount == 0 ) return textPrimary
+    return (amount > 0)?secondary:primary
+  }
+  const ItemPreviewCard = ({
+    account: { name, currency, amount},
+    previewChangeAmount
+  }) => {
+    return (
+      <TagCard
+        config={{containerHeight: 72}}
+        virtualContainerStyle={style.previewCardContainerStyle}
+        containerStyle={{backgroundColor: secondary, ...style.center}}
+        mainElement={(<Text style={{color: white}}>{name}</Text>)}
+        bottomVirtualContainerStyle={{flex: 0.5}}
+        tagStyle={style.center}
+        tagElement={(
+          <Text style={{color: getColorFromAmount(previewChangeAmount)}}>
+            {FormatCurrency(amount + previewChangeAmount, currency)}
+          </Text>
+        )}
+        >
+      </TagCard>
+    )
+  }
   return (
     <Formik
       validationSchema={validationSchema}
@@ -93,62 +142,105 @@ export default function({
           const toAccount = getAccountById(toAccountId)
           if(!toAccount) return null
           // trigger the "update "
-          if(!dirty) onToAccountChange(toAccountList[0]._id, setFieldValue)
+          if(!dirty) onAccountChange({
+            to: true, account: toAccountList[0],
+            setFieldValue
+          })
 
           return (
-            <View>
-              <TextInput
-                label="Transfer reason"
-                name="name"
-                errors={errors}
-                values={values}
-                setFieldValue={setFieldValue}
-              />
-              <View style={style.from}>
-                <Text h5>
-                    From: {fromAccount.name}
-                </Text>
+            <Background>
+              <View style={style.transactionPreviewContainer}>
+                <ItemPreviewCard
+                  account={fromAccount}
+                  previewChangeAmount={-values.amount}
+                />
+
+                <Icon name='arrow-right' size={36} />
+                <ItemPreviewCard
+                  account={toAccount}
+                  previewChangeAmount={values.amount * values.exchangeRate}
+                />
               </View>
-              <Picker
-                selectedValue={values["to"]}
-                onValueChange={(acc) => onToAccountChange(acc,setFieldValue)}
-                label="To account"
-              >
-                {
-                  toAccountList.map((acc,i) => (
-                    <Picker.Item key={i} label={acc.name} value={acc._id} />
-                  ))
-                }
-              </Picker>
-              <TextInput
-                label={`Amount (${fromAccount.currency})`}
-                name="amount"
-                keyboardType="decimal-pad"
-                errors={errors}
-                values={values}
-                setFieldValue={setFieldValue}
-              />
-              <TextInput
-                name="exchangeRate"
-                label="Exchange Rate"
-                keyboardType="decimal-pad"
-                errors={errors}
-                values={values}
-                controlled={true}
-                setFieldValue={setFieldValue}
-              />
-              {/* Summary component */}
               <View style={style.summary}>
-                <Text h4>
-                  Total:
-                </Text>
-                <Text h2 style={style.sum}>
-                  {FormatCurrency(
-                    values.amount * values.exchangeRate,
-                    toAccount.currency
-                  )}
-                </Text>
+                <View>
+                  <Text>
+                    Total:
+                  </Text>
+                  <Text style={style.sum}>
+                    {FormatCurrency(
+                      values.amount * values.exchangeRate,
+                      toAccount.currency
+                    )}
+                  </Text>
+                </View>
+
               </View>
+
+              <Card style={style.formContainer}>
+                <TextInput
+                  label="Transfer reason"
+                  name="name"
+                  iconName="tag"
+                  iconColor={secondary}
+                  inputStyle={{color: textPrimary}}
+                  errors={errors}
+                  values={values}
+                  setFieldValue={setFieldValue}
+                />
+
+                <DropdownInput
+                  disabled
+                  selectedValue={values["from"]}
+                  onValueChange={(account) => onAccountChange({
+                    to: false,
+                    account, setFieldValue})}
+                  label="FROM"
+                  iconSize={22}
+                  iconStyle={{color: primary }}
+                  icon="arrow-right"
+                >
+                </DropdownInput>
+
+                <DropdownInput
+                  selectedValue={values["to"]}
+                  onValueChange={(account) => onAccountChange({
+                    to: true,
+                    account, setFieldValue
+                  })}
+                  label="TO"
+                  iconSize={22}
+                  iconStyle={{color: primary }}
+                  icon="bank"
+                >
+                  {
+                    toAccountList.map((acc,i) => (
+                      <Picker.Item key={i} label={acc.name} value={acc} />
+                    ))
+                  }
+                </DropdownInput>
+                <TextInput
+                  label={`Amount (${fromAccount.currency})`}
+                  name="amount"
+                  icon="money"
+                  keyboardType="decimal-pad"
+                  errors={errors}
+                  values={values}
+                  setFieldValue={setFieldValue}
+                />
+                <TextInput
+                  name="exchangeRate"
+                  label="Exchange Rate"
+                  icon="refresh"
+                  keyboardType="decimal-pad"
+                  errors={errors}
+                  values={values}
+                  controlled={true}
+                  setFieldValue={setFieldValue}
+                />
+              </Card>
+
+              {/* Summary component */}
+
               <View style={style.summary}>
                 <Button
                   icon={<Icon
@@ -165,7 +257,7 @@ export default function({
                   }
                 />
               </View>
-            </View>
+            </Background>
           )
         }
       }

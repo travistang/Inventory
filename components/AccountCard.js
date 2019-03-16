@@ -3,36 +3,63 @@ import TagCard from './TagCard'
 import PropTypes from 'prop-types'
 import {
   View, Text, StyleSheet,
-  TouchableOpacity
+  TouchableOpacity,
+  Picker
 } from 'react-native'
 import { FormatCurrency } from '../utils'
 import { withNavigation } from 'react-navigation'
 import { colors } from '../theme'
 import AccountTrendLine from './AccountTrendLine'
 const {
-  white, textPrimary, textSecondary, secondary
+  white, textPrimary, textSecondary, secondary, primary
 } = colors
 
+/*
+  Component that serve as an overview of an account,
+  or an input of choosing account
+*/
 class AccountCard extends React.Component {
+  static defaultProps = {
+    isInput: false,
+    amountChange: 0,
+  }
   static propTypes = {
-    account: PropTypes.object.isRequired
+    account: PropTypes.object.isRequired,
+    accountList: PropTypes.arrayOf(PropTypes.object),
+    amountChange: PropTypes.number,
+    isInput: PropTypes.bool.isRequired,
+    config: PropTypes.object
   }
   getMainComponent() {
+    const { amountChange } = this.props
+
     return (
       <AccountTrendLine
         color={white}
+        appendData={amountChange?[amountChange]:[]}
         backgroundColor={themeColor}
         account={this.props.account}
       />
     )
   }
-
+  getAmountChangeStyle() {
+    const { amountChange } = this.props
+    if(!amountChange) return {}
+    const color = (amountChange < 0)?primary:secondary
+    return {
+      color
+    }
+  }
   getTagComponent() {
     const { currency, amount } = this.props.account
+    const { amountChange } = this.props
     return (
       <View style={style.tagElement}>
-        <Text style={style.tagElementText}>
-          {FormatCurrency(amount, currency)}
+        <Text style={{
+            ...style.tagElementText,
+            ...this.getAmountChangeStyle()
+        }}>
+          {FormatCurrency(amount + (amountChange || 0), currency)}
         </Text>
       </View>
     )
@@ -46,24 +73,28 @@ class AccountCard extends React.Component {
     )
   }
   toAccountDetails() {
-    const { navigation, account } = this.props
-    navigation.push('AccountDetails', { account })
+    const { navigation, account, accountList } = this.props
+    navigation.push('AccountDetails', { account, accountList })
 
   }
   render() {
+    const { isInput, account, style: containerStyle, config } = this.props
+    if(!account) return null
+    const MainComponent = isInput?View:TouchableOpacity
     return (
-      <TouchableOpacity
-        style={style.container}
-        onPress={this.toAccountDetails.bind(this)}
+      <MainComponent
+        style={{...style.container, ...containerStyle}}
+        onPress={!isInput && this.toAccountDetails.bind(this)}
       >
         <TagCard
+          config={config}
           mainElement={this.getMainComponent()}
           tagElement={this.getTagComponent()}
           leftTagElement={this.getTagLeftComponent()}
           containerStyle={style.mainContainer}
           bottomVirtualContainerStyle={style.tagLeftContainer}
         />
-      </TouchableOpacity>
+      </MainComponent>
 
     )
   }
@@ -74,6 +105,9 @@ const themeColor = secondary
 const style = StyleSheet.create({
   mainContainer: {
     backgroundColor: themeColor
+  },
+  accountPicker: {
+    backgroundColor: primary
   },
   tagLeftContainer: {
     // backgroundColor: white,
@@ -96,13 +130,14 @@ const style = StyleSheet.create({
     margin: 16
   },
   tagElement: {
-    margin: 4,
+    padding: 4,
+    height: '100%',
     flexDirection: 'column',
-    alignItems: 'flex-end',
+    alignItems: 'center',
     justifyContent: 'center'
   },
   tagElementText: {
      fontSize: 22,
-     color: themeColor
+     textAlign: 'center'
    }
 })

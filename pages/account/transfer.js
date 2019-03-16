@@ -7,16 +7,14 @@ import {
 import TransferForm from '../../forms/transfer'
 import AccountModel from '../../models/account'
 import TransactionModel from '../../models/transaction'
+import Background from '../../components/Background'
+import { AccountHeaderConfig } from '../../utils'
 
 export default class TransferPage extends React.Component {
   static navigationOptions = ({navigation}) => {
     const account = navigation.getParam('account')
-    if(!account) return {
-      title: "Transfer"
-    }
-    return {
-      title: `Transfer from ${account.name}`
-    }
+    const title = account? `Transfer from ${account.name}`: 'Transfer'
+    return AccountHeaderConfig({ title })
   }
   constructor(props) {
     super(props)
@@ -75,18 +73,18 @@ export default class TransferPage extends React.Component {
     if(!fromAccount) return null
 
     return (
-      <View style={style.container}>
+      <Background style={style.container}>
         <TransferForm
           {...this.state}
           onSubmit={this.transfer.bind(this)}
         />
-      </View>
+    </Background>
     )
   }
 }
 
 const style = StyleSheet.create({
   container: {
-    margin: 16
+    padding: 16
   }
 })

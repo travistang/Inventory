@@ -134,9 +134,3 @@ class TransactionPage extends React.Component {
 }
 
 export default withNavigation(TransactionPage)
-// const style = StyleSheet.create({
-//   container: {
-//     display: 'flex',
-//     margin: 16
-//   }
-// })

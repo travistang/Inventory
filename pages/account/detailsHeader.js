@@ -41,11 +41,11 @@ export default class DetailsHeader extends React.Component {
       </View>
     )
   }
-  actionButton({icon, title, onPress}) {
+  actionButton({icon, title, onPress, disabled = false}) {
     return (
       <TouchableOpacity
-        onPress={onPress}
-        style={style.actionButtonContainer}>
+        onPress={disabled?null:onPress}
+        style={{...style.actionButtonContainer, opacity: disabled?0.5:1}}>
         <View style={style.nameRow}>
           <Icon name={icon} color={white} size={22} />
         </View>

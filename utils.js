@@ -1,8 +1,10 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { colors } from './theme'
+import HeaderComponent from './components/HeaderComponent'
 const {
-  background
+  background,
+  textSecondary
 } = colors
 export const FormatCurrency = (amount, currency) => {
   const value = parseFloat(amount).toFixed(2)
@@ -66,3 +68,14 @@ export const addOpacity = (color, opacity = 1) => {
   const rgb = hexToRgb(color)
   return `rgba(${rgb.r},${rgb.g},${rgb.b},${opacity})`
 }
+
+export const AccountHeaderConfig = ({title, icon}) => ({
+  headerStyle: CommonHeaderStyle,
+  headerTintColor: textSecondary,
+  headerTitle: (
+    <HeaderComponent
+      title={title}
+      icon={icon}
+    />
+  )
+})

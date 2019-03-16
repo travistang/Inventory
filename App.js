@@ -45,7 +45,11 @@ const RootNavigator = createBottomTabNavigator({
     AccountDetails: { screen: AccountDetailsPage },
     AddIncomePage: { screen: AddIncomePage },
     TransferPage: { screen: TransferPage },
-    BuyPage: { screen: BuyPage }
+    BuyPage: { screen: BuyPage },
+
+    Transactions: { screen: TransactionPage },
+    AccountDetailsFromTransaction: { screen: AccountDetailsPage },
+    TransactionDetailsPage: { screen: TransactionDetailsPage }
   }),
   Buy: createStackNavigator({
     GeneralBuyPage: { screen: BuyPage },
@@ -58,12 +62,6 @@ const RootNavigator = createBottomTabNavigator({
   Consume: createStackNavigator({
     Consume: { screen: ConsumePage }
   }),
-  Transactions: createStackNavigator({
-    Transactions: { screen: TransactionPage },
-    AccountDetailsFromTransaction: { screen: AccountDetailsPage },
-    TransactionDetailsPage: { screen: TransactionDetailsPage }
-  })
-
 
 }, {
   defaultNavigationOptions: ({ navigation }) => ({

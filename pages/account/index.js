@@ -41,11 +41,21 @@ export default class AccountPage extends React.Component {
             </TouchableOpacity>
           ),
           headerRight: (
-            <Button
-              type="clear"
-              onPress={params.openAddAccountView}
-              icon={{name: "add"}}
-            />
+            <View style={{flexDirection: 'row'}}>
+              <TouchableOpacity
+                style={{justifyContent: 'center', alignItems: 'center'}}
+                onPress={() => navigation.navigate('Transactions')}
+              >
+                <Icon name="exchange" size={16}/>
+              </TouchableOpacity>
+
+              <Button
+                type="clear"
+                onPress={params.openAddAccountView}
+                icon={{name: "add"}}
+              />
+            </View>
+
           )
       }
     }
@@ -120,6 +130,7 @@ export default class AccountPage extends React.Component {
             <AccountCard
               key={account.name}
               account={account}
+              accountList={this.state.accounts}
             />
           ))
         }

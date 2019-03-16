@@ -25,6 +25,7 @@
     "react-native-sparkline": "^1.0.5-beta",
     "react-native-svg": "^9.2.4",
     "react-native-svg-charts": "^5.2.0",
+    "react-native-textinput-effects": "^0.5.1",
     "react-native-vector-icons": "^6.2.0",
     "react-navigation": "^3.1.3",
     "react-redux": "^6.0.0",

@@ -4,6 +4,8 @@ import {
 } from 'react-native-elements'
 import { View } from 'react-native'
 import PropTypes from 'prop-types'
+import { Fumi } from 'react-native-textinput-effects'
+import Icon from 'react-native-vector-icons/dist/FontAwesome'
 
 export default class TextInput extends React.Component {
   static propTypes = {
@@ -12,6 +14,8 @@ export default class TextInput extends React.Component {
     errors: PropTypes.object.isRequired,
     name: PropTypes.string.isRequired,
     setFieldValue: PropTypes.func.isRequired,
+    icon: PropTypes.string,
+    iconColor: PropTypes.string,
     style: PropTypes.object,
 
     // possible types that appear for configuring the TextInput
@@ -31,20 +35,39 @@ export default class TextInput extends React.Component {
       setFieldValue(name, value)
     }
   }
+  getValue(value) {
+    const {keyboardType} = this.props
+    if(!keyboardType) return value
+    const finalValue = parseFloat(value) || 0
+    return finalValue.toString()
+
+  }
   render() {
     const {
       label, values,
       name, errors,
+      icon, iconColor,
       setFieldValue, ...props
     } = this.props
     const errorMessage = errors[name]
     return (
-      <Input label={label} name={name}
-        value={values[name]}
+      <Fumi
+        label={label}
+        value={this.getValue(values[name])}
         onChangeText={(value) => this.setFieldValue(value)}
-        errorProps={errorMessage}
+        iconClass={Icon}
+        iconName={icon}
+        iconColor={iconColor}
         {...props}
       />
     )
+    // return (
+    //   <Input label={label} name={name}
+    //     value={values[name]}
+    //     onChangeText={(value) => this.setFieldValue(value)}
+    //     errorProps={errorMessage}
+    //     {...props}
+    //   />
+    // )
   }
 }

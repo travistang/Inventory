@@ -9,12 +9,19 @@ import { Formik } from 'formik'
 import {
  View,
  Picker,
- StyleSheet
+ StyleSheet,
+ Text
 } from 'react-native'
 import {
-  Text,
   Button
 } from 'react-native-elements'
+
+import AccountCard from '../components/AccountCard'
+import Card from '../components/Card'
+import { colors } from '../theme'
+const {
+  secondary, white, textPrimary, primary
+} = colors
 
 const initialValues = {
   name: "",
@@ -24,14 +31,21 @@ const initialValues = {
 
 const style = StyleSheet.create({
   container: {
-    margin: 16
-  }
+    // margin: 16
+  },
+  submitButton: {
+    margin: 8,
+    backgroundColor: secondary,
+  },
+  inputContainer: {
+    padding: 8,
+  },
+
 })
 
 const validationSchema = Yup.object().shape({
   obtainedAmount: Yup.number()
-    .required()
-    .moreThan(0),
+    .required(),
   to: Yup.string().required(),
   name: Yup.string()
     .min(8, "Item name is too short")
@@ -39,15 +53,24 @@ const validationSchema = Yup.object().shape({
 })
 
 export default function({
+  isIncome = true,
   accountList = [],
   style: customStyle = {},
   onSubmit,
-  accountId = null,
+  accountId = null
 }) {
+  const getAccountById = (id) => (
+    accountList.filter(acc => acc._id == id)[0]
+  )
   const finalStyle = {...style, ...customStyle}
   let finalIntialValues = initialValues
   if(accountId) {
     finalIntialValues = {...initialValues, to: accountId}
+  } else {
+    // if no account is given, select the first one from the list
+    finalIntialValues = {
+      ...initialValues,
+      to: initialValues.accountList[0]}
   }
   return (
     <Formik
@@ -64,39 +87,52 @@ export default function({
       }) => {
         return (
           <View style={finalStyle.container}>
-            <TextInput
-              label="Income name"
-              name="name"
-              errors={errors}
-              values={values}
-              setFieldValue={setFieldValue}
+            <AccountCard
+              isInput={true}
+              amountChange={isIncome?(values.obtainedAmount):(-values.obtainedAmount)}
+              account={getAccountById(values.to)}
             />
-            {
-              !accountId && (
-                <Picker
-                  selectedValue={values["to"]}
-                  onValueChange={(v) => setFieldValue('to', v)}
-                  label="To account"
-                >
-                  {
-                    accountList.map((acc, i) => (
-                      <Picker.Item key={i} label={acc.name} val={acc._id} />
-                    ))
-                  }
-                </Picker>
-              )
-            }
-            <TextInput
-              label="Amount"
-              name="obtainedAmount"
-              errors={errors}
-              values={values}
-              keyboardType="decimal-pad"
-              setFieldValue={setFieldValue}
-            />
+            <Card style={style.inputContainer}>
+              <Picker
+                selectedValue={values.to}
+                onValueChange={v => setFieldValue('to',v)}
+              >
+                {
+                  accountList.map(({name, _id: id}) => (
+                    <Picker.Item label={name} value={id} />
+                  ))
+                }
+              </Picker>
+              <TextInput
+                label={isIncome?"Income name":"Expenditure name"}
+                name="name"
+                iconName="tag"
+                iconColor={secondary}
+                errors={errors}
+                values={values}
+                setFieldValue={setFieldValue}
+                inputStyle={{color: textPrimary }}
+                returnKeyType="next"
+              />
+              <TextInput
+                label="Amount"
+                name="obtainedAmount"
+                iconName="money"
+                iconColor={primary}
+                errors={errors}
+                values={values}
+                keyboardType="decimal-pad"
+                setFieldValue={setFieldValue}
+                inputStyle={{color: textPrimary }}
+                returnKeyType="next"
+              />
+            </Card>
+
             <Button
-              style={finalStyle.submitButton}
-              title="Record Income"
+              containerStyle={style.submitButton}
+              buttonStyle={{backgroundColor: secondary}}
+              titleStyle={{fontFamily: 'Raleway'}}
+              title={isIncome?"Record Income":"Record Expenditure"}
               onPress={() => onSubmit(values)}
               disabled={
                 !dirty

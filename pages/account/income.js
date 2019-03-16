@@ -10,6 +10,10 @@ import {
 import AddIncomeForm from '../../forms/addIncome'
 import AccountModel from '../../models/account'
 import TransactionModel from '../../models/transaction'
+import Background from '../../components/Background'
+import {
+  AccountHeaderConfig
+} from '../../utils'
 /*
   Although it is named as "Add Income page",
   this page also records expenditure!
@@ -19,9 +23,9 @@ export default class AddIncomePage extends React.Component {
     const account = navigation.getParam('account')
     const isIncome = navigation.getParam('income')
     if(!account) return { }
-    return {
-      title: `Add ${isIncome?"income":"expenditure"} to ${account.name}`
-    }
+    return AccountHeaderConfig({
+      title: isIncome?"income":"expenditure"
+    })
   }
   constructor(props) {
     super(props)
@@ -69,19 +73,21 @@ export default class AddIncomePage extends React.Component {
     const {
       accountList
     } = this.state
+    const isIncome = this.props.navigation.getParam('income')
     return (
-      <View style={style.container}>
+      <Background style={style.container}>
         <AddIncomeForm
+          isIncome={isIncome}
           accountList={accountList}
           accountId={this.getGivenAccountId()}
           onSubmit={this.onAddIncome.bind(this)}
         />
-      </View>
+      </Background>
     )
   }
 }
 const style = StyleSheet.create({
   container: {
-    margin: 16
+    padding: 16
   }
 })
