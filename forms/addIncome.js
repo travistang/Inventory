@@ -17,6 +17,7 @@ import {
 } from 'react-native-elements'
 
 import AccountCard from '../components/AccountCard'
+import DropdownInput from '../components/DropdownInput'
 import Card from '../components/Card'
 import { colors } from '../theme'
 const {
@@ -93,16 +94,17 @@ export default function({
               account={getAccountById(values.to)}
             />
             <Card style={style.inputContainer}>
-              <Picker
+              <DropdownInput
+                label="Account"
+                icon="bank"
                 selectedValue={values.to}
-                onValueChange={v => setFieldValue('to',v)}
-              >
+                onValueChange={v => setFieldValue('to',v)}>
                 {
                   accountList.map(({name, _id: id}) => (
                     <Picker.Item label={name} value={id} />
                   ))
                 }
-              </Picker>
+              </DropdownInput>
               <TextInput
                 label={isIncome?"Income name":"Expenditure name"}
                 name="name"
