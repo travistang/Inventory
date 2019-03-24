@@ -11,7 +11,7 @@ const { primary, white } = colors
 // given an account instance, render a trend line
 export default class AccountTrendLine extends React.Component {
   static defaultProps = {
-    numData: 5,
+    numData: 100,
     color: primary,
     appendData: []
   }

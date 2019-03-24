@@ -11,12 +11,13 @@ const style = StyleSheet.create({
 })
 export default function({
   children,
+  component: Component = ScrollView,
   style: customStyle = {},
   ...props
 }) {
   return (
-    <ScrollView {...props} style={{...style.container, ...customStyle}}>
+    <Component {...props} style={{...style.container, ...customStyle}}>
       {children}
-    </ScrollView>
+    </Component>
   )
 }

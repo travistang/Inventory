@@ -1,8 +1,7 @@
 import React from 'react'
 import {
-  View, StyleSheet
+  View, StyleSheet, Text
 } from 'react-native'
-import { Text } from 'react-native-elements'
 import Icon from 'react-native-vector-icons/dist/FontAwesome'
 export default function({
   title,
@@ -10,15 +9,15 @@ export default function({
   icon = null}) {
   return (
     <View style={style.container}>
-      <Text h1 style={style.text}>
+      <Text style={style.text}>
         {icon && <Icon name={icon} size={72}/>}
       </Text>
-      <Text h3 style={style.text}>
+      <Text style={{...style.text, fontSize: 28}}>
         {title}
       </Text>
       {
         subtitle && (
-          <Text h5 style={style.text}>
+          <Text style={style.text}>
             {subtitle}
           </Text>
         )

@@ -18,6 +18,7 @@ import * as Yup from 'yup'
 import * as _ from 'lodash'
 import ItemsInput from '../components/ItemsInput'
 import TextInput from '../components/TextInput'
+import Card from '../components/Card'
 
 export default class ConsumeForm extends React.Component {
   static propTypes = {
@@ -53,7 +54,7 @@ export default class ConsumeForm extends React.Component {
     return (
       <Formik
         enableReinitialize
-        validaationSchema={this.validationSchema()}
+        validationSchema={this.validationSchema()}
       >
       {
         ({
@@ -62,14 +63,17 @@ export default class ConsumeForm extends React.Component {
         }) => {
           return (
             <View style={style.container}>
+              <Card>
+                <TextInput
+                  label="Name"
+                  icon="tag"
+                  name="name"
+                  errors={errors}
+                  values={values}
+                  setFieldValue={setFieldValue}
+                />
+              </Card>
 
-              <TextInput
-                label="Name"
-                name="name"
-                errors={errors}
-                values={values}
-                setFieldValue={setFieldValue}
-              />
 
               <View style={{margin: 16}}>
                 <ItemsInput

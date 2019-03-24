@@ -5,30 +5,42 @@ import {
   View,
   TouchableOpacity,
   StyleSheet,
-  TextInput
+  Text,
+  Platform
 } from 'react-native'
 import {
   ListItem,
-  Text,
   Button,
   SearchBar,
   Overlay
 } from 'react-native-elements'
 
+import HeaderComponent from '../components/HeaderComponent'
+import TextInput from '../components/TextInput'
 import {
   FormatCurrency,
   FormatItemAmount
 } from '../utils'
 
 import * as _ from 'lodash'
+import {
+  quantityOptions
+} from '../models'
 
 import CenterNotice from '../components/CenterNotice'
 import ActionChip from './ActionChip'
 
 import ItemModel from '../models/items'
+import ItemCard from '../components/ItemCard'
+import Card from '../components/Card'
+import Background from '../components/Background'
 
 import Icon from 'react-native-vector-icons/dist/FontAwesome'
 import PropTypes from 'prop-types'
+import { Fumi } from 'react-native-textinput-effects'
+
+import { colors } from '../theme'
+const { secondary, primary, background } = colors
 /*
   Component that exists within a form for selecting items for buy or consume
   When the field is not "selected", it lists the items the user has chosen.
@@ -105,8 +117,12 @@ export default class ItemsInput extends React.Component {
       quantity: 0,
       cost: 0,
       choosingQuantityForItem: null,
-      quantityInterpretationMode: 'literally'
+      // use the index to locate the intepretation instead of the name
+      selectedQuantityIntepretationIndex: 0,
     }
+
+    this.isIOS = Platform.OS === 'ios'
+    this.color = props.isBuying?secondary:primary
   }
   clearItems() {
     this.setState({itemChanges: []})
@@ -138,6 +154,17 @@ export default class ItemsInput extends React.Component {
       itemChanges: this.state.itemChanges.filter( i => i.name !== name)
     })
   }
+  // the component to be rendered on the left of the item card at the top.
+  // this is meant to show the differences of the quantity given certain input.
+  getTagLeftBadge(difference) {
+    return (
+      <View style={style.previewItemLeftContainer}>
+        <Text style={style.previewItemLeftContainerText}>
+          {difference}
+        </Text>
+      </View>
+    )
+  }
   // a function that renders a preview of change of items.
   previewItemListItem(changedItem) {
     const { isBuying,
@@ -167,34 +194,26 @@ export default class ItemsInput extends React.Component {
         quantity: amountDiff,
       })
     }
-    const getBadge = () => {
-      if(isBuying) {
-        return {
-          value: FormatCurrency(cost, currency),
-          size: 'large'
-        }
-      } else {
-        return {
-          value: FormatItemAmount(amountDiff, originalItem),
-          size: 'large'
-        }
-      }
-    }
+    const valueText = isBuying?
+      `+${FormatCurrency(cost, currency)}`:
+      `-${FormatItemAmount(amountDiff, originalItem)}`
     return (
-      <ListItem
-        onPress={onSelectItem}
-        title={name}
-        subtitle={amountChangedText}
-        badge={getBadge()}
-        rightElement={
-          <Button
-            type="clear"
-            style={{color: 'red'}}
-            icon={{name: 'delete', color: 'red'}}
-            onPress={() => this.removePreviewItem({ name })}
+      <View style={style.previewItemContainer}>
+        <View style={style.previewItemCardWrapper}>
+          <ItemCard
+            style={{width: '100%'}}
+            item={{...originalItem, amount: newAmount}}
+            onPress={onSelectItem}
+            leftTagElement={this.getTagLeftBadge(valueText)}
           />
-        }
-      />
+        </View>
+        <Button
+          type="clear"
+          style={{color: primary}}
+          icon={{name: 'delete', color: primary}}
+          onPress={() => this.removePreviewItem({ name })}
+        />
+      </View>
     )
   }
   itemFilteredByName() {
@@ -206,7 +225,7 @@ export default class ItemsInput extends React.Component {
     return result
   }
   searchResultListItem(item) {
-    const { name, amount, unit } = item
+    const { name, amount } = item
     const { itemChanges } = this.state
     const hasBeenSelected = itemChanges.filter(i => i.name == name).length > 0
     const onSelectItem = (() => {
@@ -236,51 +255,9 @@ export default class ItemsInput extends React.Component {
   }
   getQuantityOptions() {
     const { isBuying } = this.props
-    let names = "literally,% increased,times".split(',')
-    let icons = "space-bar,percentage,times".split(',')
-    let colors="brown,blue,green".split(',')
-    if (!isBuying) {
-      names="literally,remaining,% left,% of".split(',')
-      icons="space-bar,remove,integral,less-than-equal".split(',')
-    }
+    return quantityOptions[isBuying?"buy":"consume"]
+  }
 
-    const options = _.zipWith(
-      names, icons, colors,
-      (name, icon ,color) => ({
-        name, icon, color
-      })
-    )
-    return options
-  }
-  /*
-    Quantity is the ABSOLUTE DIFFERENCE of this transaction
-    totalAmount: the current amount of this item
-    quantity: input value
-  */
-  convertQuantityToRealAmount() {
-    const { isBuying } = this.props
-    const {
-      quantityInterpretationMode,
-      quantity,
-      choosingQuantityForItem: { amount: totalAmount }
-    } = this.state
-    if(quantity == 0 || _.isNaN(quantity)) return 0
-    switch(quantityInterpretationMode) {
-      case "literally":
-        return quantity
-      case "remaining":
-        return totalAmount - quantity
-      case '% left':
-        return totalAmount * (1 - quantity / 100)
-      case 'times':
-        return totalAmount * (1 + quantity)
-      case '% increased':
-      case '% of':
-        return totalAmount * (quantity / 100)
-      default:
-        return 0
-    }
-  }
   // invoke the callback to get the current snapshot of item changes
   reportProposedItemChange() {
     this.props.onFinishSelection(this.state.itemChanges)
@@ -290,26 +267,35 @@ export default class ItemsInput extends React.Component {
       quantity: 0,
       cost: 0,
       choosingQuantityForItem: null,
-      quantityInterpretationMode: 'literally'
+      selectedQuantityIntepretationIndex: 0,
     })
     this.reportProposedItemChange()
   }
   getQuantitySelectionOverlay() {
     const {
-      quantity: selectedQuantity,
-      choosingQuantityForItem: item,
-      quantityInterpretationMode,
+      quantity: selectedQuantity, // what's inside the `quantity` field
+      choosingQuantityForItem: item, // the item selected in the previous popup
+      selectedQuantityIntepretationIndex: selectedIndex, // the index of the mode selected
       cost
     } = this.state
     const { isBuying,
       account: { currency } = { currency: ""}
     } = this.props
-    const {name, amount, unit} = item
-    const amountLabel = "Amount " + isBuying?
-      "buying":"consuming"
 
+    const {name, amount, unit } = item
+    // return null
+    const amountLabel = "Amount " + (isBuying?
+      "buying":"consuming")
+
+    const selectedOption = this.getQuantityOptions()[selectedIndex]
+    // bind the conersion function with the original amount of the item
+    const conversionFunction = selectedOption.conversionFunction.bind(this, amount)
+    // difference betwee the proposed new amount of item and the original amount of item
+    const amountDifference = conversionFunction(selectedQuantity) || 0
+    const valuePrefix = isBuying?'+':'-'
+    const valueDifferenceText = valuePrefix + FormatItemAmount(amountDifference,item)
     // real amount is the ABSOLUTE DIFFERENCES in this action (buy or consume)
-    const realAmount = this.convertQuantityToRealAmount()
+    const realAmount = amount + amountDifference
     const submitAmount = () => {
       let payload = {name, amount: realAmount}
       if(isBuying) payload.cost = cost
@@ -319,15 +305,48 @@ export default class ItemsInput extends React.Component {
           .concat(payload)
       }, () => this.resetQuantityForm())
     }
+    const onBackdropPress = this.resetQuantityForm.bind(this)
     return (
       <Overlay
         isVisible
-        onBackdropPress={this.resetQuantityForm.bind(this)}
+        fullScreen
+        overlaySryle={{margin: 0}}
+        containerStyle={{padding: 0, backgroundColor: background}}
+        onBackdropPress={onBackdropPress}
+
       >
-        <View style={style.itemSelectionOverlayContainer}>
-          <Text h3>Amount</Text>
-          <View style={style.quantityTextInputContainer}>
-            <TextInput
+        <Background style={style.itemSelectionOverlayContainer}>
+          <Text style={style.h4}>{"Amount".toUpperCase()}</Text>
+          {
+            // since there's no return button on iPhone,
+            // there has to be a button to remove this overlay
+            this.isIOS && (
+              <Button onPress={onBackdropPress}>
+                Back
+              </Button>
+            )
+          }
+          <View style={style.itemCardRow}>
+            <ItemCard
+              style={{flex: 1}}
+              leftTagElement={this.getTagLeftBadge(valueDifferenceText)}
+              item={{...item, amount: realAmount}}
+            />
+          </View>
+          { /*
+              This is the card that holds the form
+              It is supposed to render different forms, depending on the mode.
+              If it is "buying", it should show the "quantity", the options to intepret, and the cost
+              If it is "consuming", then it should just show the "quantity", options to intepret
+
+              The final amount of the item after this change is shown above
+          */}
+          <Card style={style.quantityInputFormContainer}>
+            <Fumi
+              label="Quantity"
+              iconName="tachometer"
+              iconClass={Icon}
+              iconColor={primary}
               style={{...style.quantityTextInput, flex: 1}}
               keyboardType="decimal-pad"
               onChangeText={v => this.setState({
@@ -335,55 +354,68 @@ export default class ItemsInput extends React.Component {
               })}
               value={selectedQuantity}
             />
-            <Text h4 style={{flex: 1}}> / </Text>
-            <Text h4 style={{flex: 1}}>
-              {FormatItemAmount(amount, item)}
-            </Text>
-          </View>
-          <Text>
-            {amountLabel}: {FormatItemAmount(realAmount, item)}
-          </Text>
-          {
-            isBuying && (
-              <TextInput
-                placeholder="Cost"
-                keyboardType="decimal-pad"
-                value={cost}
-                onChangeText={v => this.setState({
-                  cost: parseFloat(v)
-                })}
-              />
-            )
-          }
-          {
-            isBuying && (
-              <View style={style.previewItemChangeTextContainer}>
-                <Text>
-                  Average Cost:
-                </Text>
-                <Text style={{fontWeight: 'bold'}}>
-                  {FormatCurrency((cost / realAmount ) || 0, currency)} / {unit}
-                </Text>
-              </View>
-
-            )
-          }
-          <Text h4>Interpret as:</Text>
-          <View style={style.quantityOptionContainer}>
             {
-              this.getQuantityOptions().map((config) => (
-                <ActionChip
-                  key={config.name}
-                  {...config}
-                  onPress={() => this.setState({
-                    quantityInterpretationMode: config.name
+              isBuying && (
+                <Fumi
+                  label="Cost"
+                  iconName="money"
+                  iconClass={Icon}
+                  iconColor={primary}
+                  keyboardType="decimal-pad"
+                  value={cost}
+                  onChangeText={v => this.setState({
+                    cost: parseFloat(v)
                   })}
-                  style={style.actionChip}
-                  selected={quantityInterpretationMode == config.name}
                 />
-              ))
+              )
             }
-          </View>
+            <View style={style.quantitySummaryRow}>
+              <Text style={{flex: 1}}>{amountLabel}</Text>
+              <Text style={{...style.h3, flex: 1, color: primary}}>
+                {FormatItemAmount(Math.abs(amountDifference), item)}
+              </Text>
+            </View>
+
+            {
+              isBuying && (
+                <View style={style.averageCostRow}>
+                  <Text style={{flex: 1}}>
+                    Average Cost:
+                  </Text>
+                  <Text style={{flex: 1,fontWeight: 'bold'}}>
+                    {FormatCurrency((cost / amountDifference ) || 0, currency)} / {unit}
+                  </Text>
+                </View>
+
+              )
+            }
+            <Text style={style.h4}>Interpret as:</Text>
+
+            <View style={style.quantityOptionContainer}>
+              {
+                this.getQuantityOptions().map((
+                  {name, conversionFunction}, index
+                ) => (
+                  <ActionChip
+                    key={name}
+                    config={{name, conversionFunction}}
+                    style={style.actionChip}
+                    selected={selectedIndex == index}
+                    onSelect={() => this.setState({
+                      selectedQuantityIntepretationIndex: index
+                    })}
+                  />
+                ))
+              }
+            </View>
+
+
+
+          </Card>
+
+
+
+
           <Button
             icon={{name: "check", color: 'white'}}
             title="Confirm"
@@ -394,7 +426,7 @@ export default class ItemsInput extends React.Component {
             }
             onPress={submitAmount.bind(this)}
           />
-        </View>
+      </Background>
       </Overlay>
     )
   }
@@ -404,18 +436,36 @@ export default class ItemsInput extends React.Component {
       searchText,
       searchTermDirty } = this.state
     const searchResult = this.itemFilteredByName()
+    const onBackdropPress = this.hideItemSelectView.bind(this)
     return (
       <Overlay
         fullScreen
-        onBackdropPress={this.hideItemSelectView.bind(this)}
+        onBackdropPress={onBackdropPress}
+        style={{backgroundColor: background}}
         isVisible={isSelectingItem}>
         <View style={style.itemSelectionOverlayContainer}>
-          <Text h3>
-            Choose an item
-          </Text>
+          <View style={style.headerRow}>
+            <Text style={style.h4}>
+              {"Choose an item".toUpperCase()}
+            </Text>
+            {
+              this.isIOS && (
+                <Button onPress={onBackdropPress}>
+                  Back
+                </Button>
+              )
+            }
+          </View>
+
           <SearchBar
             lightTheme
             autoFocus
+            containerStyle={{
+              marginTop: 16,
+              borderColor: 'transparent',
+              shadowColor: 'transparent',
+              elevation: 0,
+              backgroundColor: background}}
             style={style.searchBar}
             placeholder="Search item..."
             onChangeText={searchText => {
@@ -475,17 +525,16 @@ export default class ItemsInput extends React.Component {
           itemChanges.length ?
           (
             <View>
+              <HeaderComponent
+                title="Items"
+                icon="gift"
+                textStyle={style.h4}
+              />
               {
                 isBuying && (
                   <View style={style.summaryContainer}>
                     <Text>
                       { itemChanges.length } item(s). Total:
-                    </Text>
-                    <Text style={{fontWeight: 'bold'}}>
-                      {FormatCurrency(
-                        itemChanges.reduce((acc, item) => acc + item.cost, 0),
-                        currency
-                      )}
                     </Text>
                   </View>
                 )
@@ -524,6 +573,31 @@ export default class ItemsInput extends React.Component {
 }
 
 const style = StyleSheet.create({
+  h3: {
+    fontSize: 32
+  },
+  h4: {
+    fontSize: 22
+  },
+  previewItemLeftContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    flex: 2
+  },
+  previewItemLeftContainerText: {
+    color: secondary,
+    fontWeight: 'bold'
+  },
+  previewItemContainer: {
+    flexDirection: 'row',
+    marginHorizontal: 16,
+    marginVertical: 8
+  },
+  previewItemCardWrapper: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    flex: 1,
+  },
   previewItemChangeText: {
     display: 'flex',
     flexDirection: 'row',
@@ -537,41 +611,48 @@ const style = StyleSheet.create({
   container: {
 
   },
+  headerRow: {
+    flexDirection: 'row'
+  },
   searchResult: {
     flex: 1
-  },
-  searchResultItem: {
-    backgroundColor: "green"
   },
   searchBar: {
     flex: 1,
     // height: 48
   },
   itemSelectionOverlayContainer: {
-    margin: 8,
+    padding: 16,
     display: 'flex',
     flex: 1,
   },
   previewItemChangeText: {
-    color: 'green',
+    color: secondary,
     fontWeight: 'bold'
   },
   previewItemChangeTextContainer: {
     display: 'flex',
     flexDirection: 'row'
   },
-  quantityTextInput: {
-    borderColor: 'gray',
-    borderWidth: 0.5,
-    borderRadius: 16,
-  },
+
   actionChip: {
+    width: 128,
     // maxWidth: '50%',
+  },
+  averageCostRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    // alignItems: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 8
+
   },
   quantityOptionContainer: {
     display: 'flex',
     flexDirection: 'row',
     flexWrap: 'wrap',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
     flex: 1
   },
   amountChangedTextContainer: {
@@ -580,15 +661,25 @@ const style = StyleSheet.create({
     justifyContent: 'space-around',
     alignItems: 'flex-start'
   },
-  quantityTextInputContainer: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
+  quantityInputFormContainer: {
+    padding: 8,
+    marginVertical: 8
   },
   summaryContainer: {
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between'
+  },
+  itemCardRow: {
+    marginTop: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
+    padding: 16
+  },
+  quantitySummaryRow: {
+    // flexDirection: 'column'
+    paddingHorizontal: 16,
+    paddingVertical: 8
   }
 })

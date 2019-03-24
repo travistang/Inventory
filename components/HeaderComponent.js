@@ -11,23 +11,29 @@ const style = StyleSheet.create({
     // fontWeight: 'bold'
   }
 })
-export default function({ title, icon, style: customStyle, textStyle }) {
+export default function({
+  title,
+  icon, withIcon = false,
+  style: customStyle,
+  textStyle }) {
   return (
     <View style={{
         marginLeft: 16,
         flexDirection: 'row', alignItems: 'center',
         ...customStyle
     }}>
-    {
-      /*
-      <Icon
-        style={textStyle}
-        name={icon}
-        size={22}
-      />
-      <Text> {' '} </Text>
-      */
-    }
+      {
+        withIcon && (
+          <View>
+            <Icon
+              style={textStyle}
+              name={icon}
+              size={22}
+            />
+            <Text> {' '} </Text>
+          </View>
+        )
+      }
 
 
       <Text style={{...style.text, ...textStyle}}>

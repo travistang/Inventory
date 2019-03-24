@@ -43,7 +43,8 @@ export default function({
   item,
   tagColor = primary,
   style: customStyle = {},
-  onPress
+  onPress,
+  leftTagElement
 }) {
   const { name: itemName, amount } = item
   return (
@@ -66,6 +67,7 @@ export default function({
           </View>
 
         )}
+        leftTagElement={leftTagElement || null}
         tagElement={(
           <View style={{
               ...style.consumeTagCardTagElement,

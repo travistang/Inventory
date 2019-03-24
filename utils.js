@@ -25,12 +25,13 @@ export const FormatCurrency = (amount, currency) => {
 
 export const FormatItemAmount = (amount, item) => {
   const { unit } = item
-  return `${amount} ${unit}`
+  return `${amount.toFixed(2)} ${unit}`
 }
 
 export const CommonHeaderStyle = {
   backgroundColor: background,
-  elevation: 0
+  elevation: 0,
+  shadowColor: 'transparent'
 }
 
 export const TransactionPropTypes = PropTypes.shape({

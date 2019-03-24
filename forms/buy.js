@@ -6,13 +6,15 @@ import {
 } from 'formik'
 import {
   View, StyleSheet,
-  Picker
+  Picker,
+  Text, ScrollView,
 } from 'react-native'
 import {
-  Text,
   Button
 } from 'react-native-elements'
-
+import {
+  FormatCurrency
+} from '../utils'
 import * as Yup from 'yup'
 import * as _ from 'lodash'
 import AccountModel from '../models/account'
@@ -22,7 +24,9 @@ import { NavigationEvents } from "react-navigation"
 import Card from '../components/Card'
 import AccountCard from '../components/AccountCard'
 import DropdownInput from '../components/DropdownInput'
-
+import Background from '../components/Background'
+import { colors } from '../theme'
+const { background, white, primary, secondary } = colors
 /*
   Component that represents the form of buying stuff
 */
@@ -108,65 +112,79 @@ export default class BuyForm extends React.Component {
 
           return (
             <View style={style.container}>
-              <NavigationEvents
-                onWillFocus={this.loadAccountList.bind(this)}
-              />
-              <View style={style.accountPreviewRow}>
-                {
-                  account && (
-                    <AccountCard account={account} previewChangeAmount={-totalCost} />
-                  )
-                }
-              </View>
-              <Card style={style.formCard}>
-                {
-                  !presetAccount && (
-                    <View style={style.accountInputRow}>
-                      <DropdownInput
-                        label="Account"
-                        icon="bank"
-                        onValueChange={(acc) => setFieldValue("fromAccount", acc)}
-                        selectedValue={values["fromAccount"]}>
-                        {
-                          accounts.map((acc, i) => (
-                            <Picker.Item key={i} label={acc.name} value={acc._id} />
-                          ))
-                        }
-                      </DropdownInput>
-                    </View>
-
-                  )
-                }
-                <TextInput label="Name"
-                  name="name"
-                  errors={errors}
-                  values={values}
-                  iconName="tag"
-                  setFieldValue={setFieldValue}
+              <View>
+                <NavigationEvents
+                  onWillFocus={this.loadAccountList.bind(this)}
                 />
-              </Card>
-
-              <View style={{margin: 16}}>
-                <ItemsInput
-                  ref={this.itemInputRef}
-                  isBuying={true}
-                  account={this.getAccountById(values["fromAccount"])}
-                  onFinishSelection={
-                    (items) => setFieldValue("items", items)
+                <View style={style.accountPreviewRow}>
+                  {
+                    account && (
+                      <AccountCard account={account} previewChangeAmount={-totalCost} />
+                    )
                   }
-                />
+                </View>
+                <Card style={style.formCard}>
+                  {
+                    !presetAccount && (
+                      <View style={style.accountInputRow}>
+                        <DropdownInput
+                          label="Account"
+                          icon="bank"
+                          onValueChange={(acc) => setFieldValue("fromAccount", acc)}
+                          selectedValue={values["fromAccount"]}>
+                          {
+                            accounts.map((acc, i) => (
+                              <Picker.Item key={i} label={acc.name} value={acc._id} />
+                            ))
+                          }
+                        </DropdownInput>
+                      </View>
+
+                    )
+                  }
+                  <TextInput label="Name"
+                    name="name"
+                    errors={errors}
+                    values={values}
+                    iconName="tag"
+                    setFieldValue={setFieldValue}
+                  />
+                </Card>
+
+                <View style={{margin: 16 }}>
+                  <ItemsInput
+                    ref={this.itemInputRef}
+                    isBuying={true}
+                    account={this.getAccountById(values["fromAccount"])}
+                    onFinishSelection={
+                      (items) => setFieldValue("items", items)
+                    }
+                  />
+                </View>
               </View>
 
-              <Button
-                type="outline"
-                disabled={_.isEmpty(values["items"])}
-                onPress={() => this.buy({values, resetForm})}
-                icon={{name: "shopping-cart" }}
-                buttonStyle={{color: 'green'}}
-                title="Buy"
-              />
+              {
+                account && (
+                  <View style={style.buyButtonContainer}>
+                    <View style={style.totalTextContainer}>
+                      <Text style={style.totalLabel}>Total</Text>
+                      <Text style={style.totalAmountLabel}>
+                        {FormatCurrency(totalCost, account.currency)}
+                      </Text>
+                    </View>
+                    <View style={style.buyButtonInnerContainer}>
+                      <Button
+                        disabled={_.isEmpty(values["items"])}
+                        onPress={() => this.buy({values, resetForm})}
+                        icon={{name: "shopping-cart" }}
+                        title="Buy"
+                      />
+                    </View>
+                  </View>
+              )}
 
             </View>
+
           )
         }
       }
@@ -186,10 +204,24 @@ export default class BuyForm extends React.Component {
 
 const style = StyleSheet.create({
   container: {
-    display: 'flex'
+    display: 'flex',
+    flex: 1,
   },
   formCard: {
     padding: 16
+  },
+  totalTextContainer: {
+    padding: 8,
+    flexDirection: 'column'
+  },
+  totalLabel: {
+    // color: secondary,
+    color: primary,
+  },
+  totalAmountLabel: {
+    // color: secondary,
+    color: primary,
+    fontSize: 28
   },
   accountInputRow: {
     marginHorizontal: 8
@@ -199,6 +231,27 @@ const style = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center'
   },
-
+  // stick with the bottom of the container, and put it above everything
+  buyButtonContainer: {
+    // zIndex: 200,
+    // height: 72,
+    display: 'flex',
+    flexDirection: 'row',
+    marginBottom: 72,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    // position: 'fixed',
+    // backgroundColor: background,
+    // left: 0,
+    // right: 0,
+    // bottom: 0,
+  },
+  mainContainer: {
+    // height: 100,
+  },
+  buyButtonInnerContainer: {
+    flex: 1,
+    alignItems: 'center'
+  }
 
 })

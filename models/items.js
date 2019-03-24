@@ -12,7 +12,7 @@ class Item {
     return {
       name: '',
       amount: 0,
-      unit: '',
+      unit: recognizedUnits[0],
       // craftable: true,
     }
   }

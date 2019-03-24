@@ -5,11 +5,11 @@ import {
 import {
  View,
  Picker,
- StyleSheet
+ StyleSheet,
+ Text
 } from 'react-native'
 
 import {
-  Text,
   Button
 } from 'react-native-elements'
 
@@ -19,6 +19,10 @@ import * as _ from 'lodash'
 import ItemModel from '../models/items'
 import Icon from 'react-native-vector-icons/dist/FontAwesome'
 import TextInput from '../components/TextInput'
+import Card from '../components/Card'
+import DropdownInput from '../components/DropdownInput'
+import { colors } from '../theme'
+const { primary, secondary, white } = colors
 
 export default function({
   initialItemValues = ItemModel.initialItemValues,
@@ -47,38 +51,52 @@ export default function({
       }) => {
         return (
           <View style={style.formContainer}>
-            <TextInput
-              label="Item Name"
-              name="name"
-              errors={errors}
-              values={values}
-              setFieldValue={setFieldValue}
-              onChange={(itemName) =>
-                checkItemNameCollision({itemName, setErrors, errors})}
-            />
-            <TextInput
-              label="Amount"
-              name="amount"
-              keyboardType="decimal-pad"
-              errors={errors}
-              values={values}
-              setFieldValue={setFieldValue}
-            />
-            <Picker
-              selectedValue={values["unit"]}
-              onValueChange={(unit) => setFieldValue("unit", unit)}
-              label="Unit"
-            >
-              {
-                recognizedUnits.map((unit, i) => (
-                  <Picker.Item key={i} label={unit} value={unit} />
-                ))
-              }
-            </Picker>
+            <Card style={style.cardContainer}>
+              <TextInput
+                label="Item Name"
+                name="name"
+                icon="tag"
+                errors={errors}
+                values={values}
+                setFieldValue={setFieldValue}
+                onChange={(itemName) =>
+                  checkItemNameCollision({itemName, setErrors, errors})}
+              />
+              <TextInput
+                label="Initial Amount"
+                name="amount"
+                icon="ruler"
+                iconColor={secondary}
+                keyboardType="decimal-pad"
+                errors={errors}
+                values={values}
+                setFieldValue={setFieldValue}
+              />
+              <View style={style.unitRowContainer}>
+                <DropdownInput
+                  label="Unit"
+                  icon="tachometer"
+                  iconColor={secondary}
+                  selectedValue={values["unit"]}
+                  onValueChange={(unit) => setFieldValue("unit", unit)}
+                  label="Unit"
+                >
+                  {
+                    recognizedUnits.map((unit, i) => (
+                      <Picker.Item key={i} label={unit} value={unit} />
+                    ))
+                  }
+                </DropdownInput>
+              </View>
+
+            </Card>
+
+
             <View style={style.submitButton}>
               <Button
+                containerStyle={style.button}
                 title="Create Item"
-                icon={{name: "plus"}}
+                icon={{name: "add"}}
                 onPress={() => onSubmit(values)}
                 disabled={!dirty || !_.isEmpty(errors) || isSubmitting}
               >

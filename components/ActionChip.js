@@ -5,18 +5,20 @@ import {
 import {
   Text, Icon
 } from 'react-native-elements'
-
+import { colors } from '../theme'
+const {white, primary, secondary} = colors
 /*
   Similar to ActionBox, but this looks like a chip instead of a box...
 */
 export default function ({
-  name, icon,
-  color = "blue",
+  config: {name, conversionFunction},
+  key,
+  selected = false,
   height = 32,
-  onPress,
-  selected,
+  onSelect,
   style: customStyle
 }) {
+  const color = primary // so it's easier to change later
   const computedStyle = {
     backgroundColor: selected?color:"transparent",
     height,
@@ -26,13 +28,13 @@ export default function ({
     paddingHorizontal: height / 2 // make sure the arc from both sides are not occupied
   }
   return (
-    <TouchableOpacity onPress={onPress}>
+    <TouchableOpacity onPress={onSelect}>
       <View style={{
-          ...customStyle,
           ...style.container,
+          ...customStyle,
           ...computedStyle
       }}>
-        <Text style={{color: selected?'white':color}}>
+        <Text style={{color: selected?white:color}}>
           {name}
         </Text>
       </View>

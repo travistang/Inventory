@@ -68,7 +68,8 @@ export default class BuyPage extends React.Component {
   render() {
     const { account } = this.state
     return (
-      <Background style={style.container}>
+      <Background
+        style={style.container}>
         <BuyForm
           onBuy={this.onBuy.bind(this)}
           account={account}
