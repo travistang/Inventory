@@ -64,3 +64,7 @@ export const quantityOptions = {
     }
   ]
 }
+
+export const flagOfCurrency =
+  cur => `https://raw.githubusercontent.com/transferwise/currency-flags/master/src/flags/${cur.toLowerCase()}.png`
+  

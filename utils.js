@@ -23,6 +23,7 @@ export const FormatCurrency = (amount, currency) => {
   }
 }
 
+
 export const FormatItemAmount = (amount, item) => {
   const { unit } = item
   return `${amount.toFixed(2)} ${unit}`

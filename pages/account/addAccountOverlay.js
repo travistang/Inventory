@@ -3,7 +3,9 @@ import PropTypes from 'prop-types'
 
 import {
   View, StyleSheet,
-  Picker
+  Picker,
+  Text, TouchableOpacity,
+  Platform
 } from 'react-native'
 import {
   Formik,
@@ -11,10 +13,12 @@ import {
 
 import {
   Overlay,
-  Text,
 } from 'react-native-elements'
 import AccountModel from '../../models/account'
 import CreateAccountForm from '../../forms/createAccount'
+import { colors } from '../../theme'
+
+const { white, primary, background } = colors
 
 export default class AddAccountOverlay extends React.Component {
   static propTypes = {
@@ -39,10 +43,28 @@ export default class AddAccountOverlay extends React.Component {
     } = this.props
     return (
       <Overlay
+        fullScreen
         onBackdropPress={onClose}
         isVisible={isOpen}>
         <View style={style.container}>
-          <Text h3> Add an account </Text>
+          <View style={style.header}>
+            <Text style={style.headerText}>
+              {"Add an account".toUpperCase()}
+            </Text>
+            {
+              (Platform.OS == 'ios')?(
+                <TouchableOpacity
+                    onPress={onClose}
+                >
+                  <Text style={style.cancelText}>
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+              )
+              : null
+            }
+          </View>
+
           <CreateAccountForm
             style={style.form}
             onSubmit={values => this.createAccount(values)}
@@ -56,9 +78,19 @@ export default class AddAccountOverlay extends React.Component {
 const style = StyleSheet.create({
   container: {
     margin: 8,
-    textAlign: 'center'
+    textAlign: 'center',
+    backgroundColor: background
   },
   form: {
     marginTop: 16,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  headerText: {
+    flex: 1,
+    fontSize: 22
   }
 })

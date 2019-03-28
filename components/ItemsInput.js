@@ -350,9 +350,9 @@ export default class ItemsInput extends React.Component {
               style={{...style.quantityTextInput, flex: 1}}
               keyboardType="decimal-pad"
               onChangeText={v => this.setState({
-                quantity: parseFloat(v)
+                quantity: parseFloat(v) || 0
               })}
-              value={selectedQuantity}
+              value={(selectedQuantity || 0).toString()}
             />
             {
               isBuying && (
@@ -362,9 +362,9 @@ export default class ItemsInput extends React.Component {
                   iconClass={Icon}
                   iconColor={primary}
                   keyboardType="decimal-pad"
-                  value={cost}
+                  value={(cost || 0).toString()}
                   onChangeText={v => this.setState({
-                    cost: parseFloat(v)
+                    cost: parseFloat(v) || 0
                   })}
                 />
               )
@@ -408,27 +408,34 @@ export default class ItemsInput extends React.Component {
                 ))
               }
             </View>
-
-
-
           </Card>
-
-
-
 
           <Button
             icon={{name: "check", color: 'white'}}
             title="Confirm"
             disabled={
-              !realAmount ||
-              (isBuying && !cost) ||
-              (!isBuying && realAmount > amount)
+              !this.validateQuantityInfo({
+                isBuying,
+                realAmount,
+                amountDifference
+              })
             }
             onPress={submitAmount.bind(this)}
           />
       </Background>
       </Overlay>
     )
+  }
+  validateQuantityInfo({
+    isBuying,
+    realAmount,
+    amountDifference
+  }) {
+    if(!amountDifference || !realAmount) return false
+    if(amountDifference == 0)  return false
+    if(realAmount < 0) return false
+
+    return true
   }
   getItemSelectionOverlay() {
     const {
@@ -499,9 +506,7 @@ export default class ItemsInput extends React.Component {
     )
   }
   // return a list of items that are selected selection
-  /*
 
-  */
   render() {
     const {
       items, itemChanges,
@@ -525,20 +530,23 @@ export default class ItemsInput extends React.Component {
           itemChanges.length ?
           (
             <View>
-              <HeaderComponent
-                title="Items"
-                icon="gift"
-                textStyle={style.h4}
-              />
-              {
-                isBuying && (
-                  <View style={style.summaryContainer}>
-                    <Text>
-                      { itemChanges.length } item(s). Total:
-                    </Text>
-                  </View>
-                )
-              }
+              <View style={style.headerRow}>
+                <HeaderComponent
+                  title="Items"
+                  icon="gift"
+                  textStyle={style.h4}
+                />
+                {
+                  isBuying && (
+                    <View style={style.summaryContainer}>
+                      <Text>
+                        { itemChanges.length } item(s). Total:
+                      </Text>
+                    </View>
+                  )
+                }
+              </View>
+
               {
                 // list of items
                 itemChanges
@@ -612,7 +620,9 @@ const style = StyleSheet.create({
 
   },
   headerRow: {
-    flexDirection: 'row'
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between'
   },
   searchResult: {
     flex: 1
@@ -675,7 +685,7 @@ const style = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
-    padding: 16
+    paddingHorizontal: 16
   },
   quantitySummaryRow: {
     // flexDirection: 'column'

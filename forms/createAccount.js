@@ -4,11 +4,14 @@ import {
 } from 'formik'
 import {
  View,
- Picker
+ Picker,
+ Text, Image,
+ TouchableOpacity,
+ StyleSheet
 } from 'react-native'
 
+import { flagOfCurrency } from '../models'
 import {
-  Text,
   Button
 } from 'react-native-elements'
 
@@ -18,10 +21,27 @@ import AccountModel from '../models/account'
 import Icon from 'react-native-vector-icons/dist/FontAwesome'
 import TextInput from '../components/TextInput'
 
+import AutocompleteTextInput from '../components/AutocompleteTextInput'
+
+const style = StyleSheet.create({
+  currencyOptionContainer: {
+    flexDirection: 'row',
+    padding: 8,
+    justifyContent: 'space-between'
+  },
+  countryFlag: {
+    height: 24,
+    width: 32,
+    marginRight: 8,
+  },
+  currencyOptionText: {
+    fontSize: 24
+  }
+})
 export default function({
   initialAccountValues = AccountModel.initialAccountValues,
   onSubmit,
-  style
+  style: customStyle
 }) {
   return (
     <Formik
@@ -37,9 +57,10 @@ export default function({
         isSubmitting
       }) => {
         return (
-          <View style={style}>
+          <View style={customStyle}>
             <TextInput
               label="Account Name"
+              iconName="tag"
               name="name"
               errors={errors}
               values={values}
@@ -48,21 +69,37 @@ export default function({
             <TextInput
               label="Initial Amount"
               name="amount"
+              iconName="money"
               errors={errors}
               values={values}
               keyboardType="numeric"
               setFieldValue={setFieldValue}
             />
-            <Picker
-              selectedValue={values["currency"]}
-              onValueChange={(v) => setFieldValue('currency', v)}
-            >
-              {
-                AccountModel.recognizedCurrency.map((cur, i) => (
-                   <Picker.Item label={cur} value={cur}/>
-                ))
+            <AutocompleteTextInput
+              options={
+                (AccountModel.recognizedCurrency || [])
+                  .map(currency => ({value: currency}))
               }
-            </Picker>
+              transformInput={v => v.toUpperCase().trim()}
+              renderItem={({value: cur}) => (
+                <View style={style.currencyOptionContainer}>
+                  <Image style={style.countryFlag}
+                    source={{uri: flagOfCurrency(cur)}}
+                  />
+                  <Text style={style.currencyOptionText}>
+                    {cur}
+                  </Text>
+                </View>
+              )}
+              label="dollar"
+              name="currency"
+              iconName="dollar"
+              errors={errors}
+              values={values}
+              setFieldValue={setFieldValue}
+              onChangeText={v => setFieldValue('currency', v)}
+            />
+
             <Button
               title="Create Account"
               onPress={onSubmit.bind(this,values)}

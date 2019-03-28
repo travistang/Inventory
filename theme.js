@@ -8,6 +8,7 @@ export const configureGlobalProps = () => {
     }
   })
 }
+
 export default theme = {
   Text: {
     // h2Style: {
