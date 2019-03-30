@@ -11,7 +11,7 @@ import {
   Button
 } from 'react-native-elements'
 import { withNavigation } from 'react-navigation'
-
+import ExportRecordOverlay from './exportRecordOverlay'
 import Card from '../../components/Card'
 import Background from '../../components/Background'
 import HeaderComponent from '../../components/HeaderComponent'
@@ -24,6 +24,10 @@ import {
 
 class TransactionPage extends React.Component {
   static navigationOptions = ({navigation}) => {
+    const setState = navigation.getParam("setState")
+
+    if(!setState) return {} // no setState function, header is not ready
+
     return {
         headerStyle: CommonHeaderStyle,
         headerTitle: (
@@ -35,7 +39,7 @@ class TransactionPage extends React.Component {
       headerRight: (
         <Button
           type="clear"
-          onPress={() => exportDB("example.com")}
+          onPress={() => setState({ isExportDialogOpen: true })}
           icon={{name: "share"}}
         />
       )
@@ -56,7 +60,10 @@ class TransactionPage extends React.Component {
       transactions: [],
 
       // flag for refreshing
-      refreshing: false
+      refreshing: false,
+
+      // flag for toggling export dialog
+      isExportDialogOpen: false
     }
   }
   // reload all transaction records.
@@ -99,14 +106,21 @@ class TransactionPage extends React.Component {
 
   componentDidMount() {
     this.loadRecentTransactionRecords()
+    // deliver the "setState" function to the header
+    this.props.navigation.setParams({
+      setState: this.setState.bind(this)
+    })
   }
   gotoDetails(transaction) {
     this.props.navigation.navigate('TransactionDetailsPage', {
       transaction
     })
   }
+  onExportRecordOverlayClose() {
+    this.setState({isExportDialogOpen: false})
+  }
   render() {
-    const { transactions } = this.state
+    const { transactions, isExportDialogOpen } = this.state
     return (
       <Background
         refreshControl={
@@ -116,6 +130,12 @@ class TransactionPage extends React.Component {
           />
         }
       >
+
+        <ExportRecordOverlay
+          isOpen={isExportDialogOpen}
+          onClose={this.onExportRecordOverlayClose.bind(this)}
+        />
+
         {
           transactions.map((trans, i) => (
             <TouchableOpacity

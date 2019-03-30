@@ -10,15 +10,17 @@ import {
 } from 'react-native'
 
 import {
-  Text,
   Button
-} from 'react-native-elements'
+} from '../components'
 
 import * as Yup from 'yup'
 import * as _ from 'lodash'
-import ItemsInput from '../components/ItemsInput'
-import TextInput from '../components/TextInput'
-import Card from '../components/Card'
+import {
+  ItemsInput, TextInput, Card
+} from '../components'
+
+import { colors } from '../theme'
+const { white, secondary, primary } = colors
 
 export default class ConsumeForm extends React.Component {
   static propTypes = {
@@ -37,6 +39,7 @@ export default class ConsumeForm extends React.Component {
       // reset everything
       resetForm({})
       this.itemInputRef.current.clearItems()
+
     })
   }
   validationSchema() {
@@ -67,6 +70,7 @@ export default class ConsumeForm extends React.Component {
                 <TextInput
                   label="Name"
                   icon="tag"
+                  iconColor={primary}
                   name="name"
                   errors={errors}
                   values={values}
@@ -86,7 +90,8 @@ export default class ConsumeForm extends React.Component {
               </View>
 
               <Button
-                type="outline"
+                type="block"
+                color={primary}
                 disbled={!_.isEmpty(errors)}
                 onPress={this.consume.bind(this, {values, resetForm})}
                 title="Consume"
@@ -101,6 +106,12 @@ export default class ConsumeForm extends React.Component {
 }
 
 const style = StyleSheet.create({
+  submitButton: {
+    backgroundColor: white,
+    borderRadius: 16,
+    borderColor: secondary,
+
+  },
   container: {
     display: 'flex'
   }

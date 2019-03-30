@@ -10,13 +10,22 @@ import {
 } from 'react-native'
 import {
   ListItem,
-  Button,
   SearchBar,
   Overlay
 } from 'react-native-elements'
 
-import HeaderComponent from '../components/HeaderComponent'
-import TextInput from '../components/TextInput'
+import {
+  Button,
+  HeaderComponent,
+  TextInput,
+  CenterNotice,
+  ItemCard,
+  Card,
+  Background,
+} from '../components'
+// import Button from '../components/Button'
+// import HeaderComponent from '../components/HeaderComponent'
+// import TextInput from '../components/TextInput'
 import {
   FormatCurrency,
   FormatItemAmount
@@ -27,20 +36,23 @@ import {
   quantityOptions
 } from '../models'
 
-import CenterNotice from '../components/CenterNotice'
+// import CenterNotice from '../components/CenterNotice'
 import ActionChip from './ActionChip'
 
 import ItemModel from '../models/items'
-import ItemCard from '../components/ItemCard'
-import Card from '../components/Card'
-import Background from '../components/Background'
+// import ItemCard from '../components/ItemCard'
+// import Card from '../components/Card'
+// import Background from '../components/Background'
 
 import Icon from 'react-native-vector-icons/dist/FontAwesome'
 import PropTypes from 'prop-types'
 import { Fumi } from 'react-native-textinput-effects'
 
 import { colors } from '../theme'
-const { secondary, primary, background } = colors
+const {
+  textSecondary,
+  secondary, primary, background, white
+} = colors
 /*
   Component that exists within a form for selecting items for buy or consume
   When the field is not "selected", it lists the items the user has chosen.
@@ -195,7 +207,7 @@ export default class ItemsInput extends React.Component {
       })
     }
     const valueText = isBuying?
-      `+${FormatCurrency(cost, currency)}`:
+      `-${FormatCurrency(cost, currency)}`:
       `-${FormatItemAmount(amountDiff, originalItem)}`
     return (
       <View style={style.previewItemContainer}>
@@ -208,9 +220,8 @@ export default class ItemsInput extends React.Component {
           />
         </View>
         <Button
-          type="clear"
-          style={{color: primary}}
-          icon={{name: 'delete', color: primary}}
+          color={primary}
+          icon="delete"
           onPress={() => this.removePreviewItem({ name })}
         />
       </View>
@@ -292,12 +303,13 @@ export default class ItemsInput extends React.Component {
     const conversionFunction = selectedOption.conversionFunction.bind(this, amount)
     // difference betwee the proposed new amount of item and the original amount of item
     const amountDifference = conversionFunction(selectedQuantity) || 0
-    const valuePrefix = isBuying?'+':'-'
+    const valuePrefix = isBuying?'+':''
     const valueDifferenceText = valuePrefix + FormatItemAmount(amountDifference,item)
     // real amount is the ABSOLUTE DIFFERENCES in this action (buy or consume)
-    const realAmount = amount + amountDifference
+    const absDifference = Math.abs(amountDifference)
+    const amountAfter = amount + amountDifference
     const submitAmount = () => {
-      let payload = {name, amount: realAmount}
+      let payload = {name, amount: absDifference}
       if(isBuying) payload.cost = cost
       this.setState({
         itemChanges: this.state.itemChanges
@@ -321,7 +333,8 @@ export default class ItemsInput extends React.Component {
             // since there's no return button on iPhone,
             // there has to be a button to remove this overlay
             this.isIOS && (
-              <Button onPress={onBackdropPress}>
+              <Button
+                onPress={onBackdropPress}>
                 Back
               </Button>
             )
@@ -330,7 +343,7 @@ export default class ItemsInput extends React.Component {
             <ItemCard
               style={{flex: 1}}
               leftTagElement={this.getTagLeftBadge(valueDifferenceText)}
-              item={{...item, amount: realAmount}}
+              item={{...item, amount: amountAfter}}
             />
           </View>
           { /*
@@ -389,7 +402,7 @@ export default class ItemsInput extends React.Component {
 
               )
             }
-            <Text style={style.h4}>Interpret as:</Text>
+            <Text>Interpret as:</Text>
 
             <View style={style.quantityOptionContainer}>
               {
@@ -411,12 +424,14 @@ export default class ItemsInput extends React.Component {
           </Card>
 
           <Button
-            icon={{name: "check", color: 'white'}}
+            type="block"
+            color={primary}
+            icon="check"
             title="Confirm"
             disabled={
               !this.validateQuantityInfo({
                 isBuying,
-                realAmount,
+                realAmount: amountAfter,
                 amountDifference
               })
             }
@@ -431,7 +446,6 @@ export default class ItemsInput extends React.Component {
     realAmount,
     amountDifference
   }) {
-    if(!amountDifference || !realAmount) return false
     if(amountDifference == 0)  return false
     if(realAmount < 0) return false
 
@@ -554,7 +568,11 @@ export default class ItemsInput extends React.Component {
                 )
               }
               <Button
-                icon={{name: 'add'}}
+                type="outline"
+                color={primary}
+                buttonStyle={style.addItemButton}
+                icon="add"
+                titleStyle={style.addItemButtonTitle}
                 title="Add item"
                 onPress={this.displayItemSelectView.bind(this)}
               />
@@ -691,5 +709,12 @@ const style = StyleSheet.create({
     // flexDirection: 'column'
     paddingHorizontal: 16,
     paddingVertical: 8
+  },
+  addItemButton: {
+    backgroundColor: white,
+    borderRadius: 16
+  },
+  addItemButtonTitle: {
+
   }
 })

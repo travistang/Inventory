@@ -9,18 +9,15 @@ import {
  Text
 } from 'react-native'
 
-import {
-  Button
-} from 'react-native-elements'
-
 import { recognizedUnits } from '../constants'
 import * as Yup from 'yup'
 import * as _ from 'lodash'
 import ItemModel from '../models/items'
 import Icon from 'react-native-vector-icons/dist/FontAwesome'
-import TextInput from '../components/TextInput'
-import Card from '../components/Card'
-import DropdownInput from '../components/DropdownInput'
+import {
+  TextInput, Card, DropdownInput, Button
+} from '../components'
+
 import { colors } from '../theme'
 const { primary, secondary, white } = colors
 
@@ -30,15 +27,17 @@ export default function({
   style
 }) {
   // given a name, check if an item with same name exists before
-  const checkItemNameCollision = async ({itemName, setErrors, errors}) => {
+  const checkItemNameCollision = async ({itemName, setStatus}) => {
     const existingItem = await ItemModel.getItemByName(itemName)
     if(!!existingItem) {
-      setErrors({
-        ...errors,
+      setStatus({
         name: "Item with given name has been recorded already"
       })
+    } else {
+      setStatus({})
     }
   }
+
   return (
     <Formik
       validationSchema={ItemModel.validationSchema()}
@@ -46,7 +45,7 @@ export default function({
     >
     {
       ({
-        setErrors, errors, values, dirty,
+        setStatus, errors, values, dirty, status,
         setFieldValue, isSubmitting
       }) => {
         return (
@@ -59,13 +58,15 @@ export default function({
                 errors={errors}
                 values={values}
                 setFieldValue={setFieldValue}
-                onChange={(itemName) =>
-                  checkItemNameCollision({itemName, setErrors, errors})}
+                onChangeText={(itemName) => {
+                  setFieldValue("name", itemName)
+                  checkItemNameCollision({itemName, setStatus})
+                }}
               />
               <TextInput
                 label="Initial Amount"
                 name="amount"
-                icon="ruler"
+                icon="weight"
                 iconColor={secondary}
                 keyboardType="decimal-pad"
                 errors={errors}
@@ -94,11 +95,18 @@ export default function({
 
             <View style={style.submitButton}>
               <Button
+                type="block"
+                color={secondary}
                 containerStyle={style.button}
                 title="Create Item"
-                icon={{name: "add"}}
+                icon="add"
                 onPress={() => onSubmit(values)}
-                disabled={!dirty || !_.isEmpty(errors) || isSubmitting}
+                disabled={
+                  !dirty
+                  || !_.isEmpty(errors)
+                  || !_.isEmpty(status)
+                  || isSubmitting
+                }
               >
               </Button>
             </View>

@@ -1,9 +1,9 @@
 import React from 'react'
 import {
-  View, TouchableOpacity, StyleSheet
+  View, TouchableOpacity, StyleSheet, Text
 } from 'react-native'
 import {
-  Text, Icon
+  Icon
 } from 'react-native-elements'
 import { colors } from '../theme'
 const {white, primary, secondary} = colors
@@ -35,7 +35,7 @@ export default function ({
           ...computedStyle
       }}>
         <Text style={{color: selected?white:color}}>
-          {name}
+          {name.toUpperCase()}
         </Text>
       </View>
     </TouchableOpacity>

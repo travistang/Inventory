@@ -9,12 +9,10 @@ export const DB = new Datastore({
 })
 
 // TODO: encrypt the payload before saving to database
-export const exportDB = () => {
+export const exportDB = (address = serverURL) => {
   return DB.findAsync({}).then(db =>
-    axios.post(serverURL, db)
-  ).then(response => {
-    alert(response)
-  })
+    axios.post(address, db)
+  )
 }
 
 /*
@@ -67,4 +65,3 @@ export const quantityOptions = {
 
 export const flagOfCurrency =
   cur => `https://raw.githubusercontent.com/transferwise/currency-flags/master/src/flags/${cur.toLowerCase()}.png`
-  

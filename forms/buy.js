@@ -144,6 +144,7 @@ export default class BuyForm extends React.Component {
                   }
                   <TextInput label="Name"
                     name="name"
+                    iconColor={primary}
                     errors={errors}
                     values={values}
                     iconName="tag"
@@ -172,14 +173,14 @@ export default class BuyForm extends React.Component {
                         {FormatCurrency(totalCost, account.currency)}
                       </Text>
                     </View>
-                    <View style={style.buyButtonInnerContainer}>
                       <Button
+                        buttonStyle={style.buyButton}
+                        titleStyle={style.buyButtonTitle}
                         disabled={_.isEmpty(values["items"])}
                         onPress={() => this.buy({values, resetForm})}
-                        icon={{name: "shopping-cart" }}
+                        icon={{name: "shopping-cart", color: white }}
                         title="Buy"
                       />
-                    </View>
                   </View>
               )}
 
@@ -215,11 +216,9 @@ const style = StyleSheet.create({
     flexDirection: 'column'
   },
   totalLabel: {
-    // color: secondary,
     color: primary,
   },
   totalAmountLabel: {
-    // color: secondary,
     color: primary,
     fontSize: 28
   },
@@ -233,24 +232,24 @@ const style = StyleSheet.create({
   },
   // stick with the bottom of the container, and put it above everything
   buyButtonContainer: {
-    // zIndex: 200,
-    // height: 72,
     display: 'flex',
     flexDirection: 'row',
     marginBottom: 72,
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    // position: 'fixed',
-    // backgroundColor: background,
-    // left: 0,
-    // right: 0,
-    // bottom: 0,
+    alignItems: 'center'
+  },
+  buyButton: {
+    backgroundColor: primary,
+    width: '100%'
+  },
+  buyButtonTitle: {
+    color: white
   },
   mainContainer: {
     // height: 100,
   },
   buyButtonInnerContainer: {
     flex: 1,
+    flexDirection: 'row',
     alignItems: 'center'
   }
 
