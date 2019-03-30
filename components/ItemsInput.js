@@ -200,10 +200,12 @@ export default class ItemsInput extends React.Component {
         </Text>
       </View>
     )
+    // prepare the callback for editing the item
     const onSelectItem = () => {
       this.setState({
         choosingQuantityForItem: this.getOriginalItem(name),
         quantity: amountDiff,
+        cost
       })
     }
     const valueText = isBuying?
@@ -213,6 +215,7 @@ export default class ItemsInput extends React.Component {
       <View style={style.previewItemContainer}>
         <View style={style.previewItemCardWrapper}>
           <ItemCard
+            onPress={onSelectItem.bind(this)}
             style={{width: '100%'}}
             item={{...originalItem, amount: newAmount}}
             onPress={onSelectItem}
@@ -242,7 +245,6 @@ export default class ItemsInput extends React.Component {
     const onSelectItem = (() => {
       this.setState({
         choosingQuantityForItem: item,
-        quantity: 0,
       })
     }).bind(this)
     return (

@@ -54,6 +54,7 @@ export default function({
         ...style.consumeItemContainer,
         ...customStyle
       }}
+      onPress={onPress}
     >
       <TagCard
         config={{containerHeight: 72}}
