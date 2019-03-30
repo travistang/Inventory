@@ -80,13 +80,5 @@ export default class TextInput extends React.Component {
         {...props}
       />
     )
-    // return (
-    //   <Input label={label} name={name}
-    //     value={values[name]}
-    //     onChangeText={(value) => this.setFieldValue(value)}
-    //     errorProps={errorMessage}
-    //     {...props}
-    //   />
-    // )
   }
 }

@@ -9,22 +9,24 @@ import {
   Picker,
   Text, ScrollView,
 } from 'react-native'
-import {
-  Button
-} from 'react-native-elements'
+
 import {
   FormatCurrency
 } from '../utils'
 import * as Yup from 'yup'
 import * as _ from 'lodash'
+import {
+  Button,
+  ItemsInput,
+  TextInput,
+  Card,
+  AccountCard,
+  DropdownInput,
+  Background
+} from '../components'
 import AccountModel from '../models/account'
-import ItemsInput from '../components/ItemsInput'
-import TextInput from '../components/TextInput'
 import { NavigationEvents } from "react-navigation"
-import Card from '../components/Card'
-import AccountCard from '../components/AccountCard'
-import DropdownInput from '../components/DropdownInput'
-import Background from '../components/Background'
+
 import { colors } from '../theme'
 const { background, white, primary, secondary } = colors
 /*
@@ -174,11 +176,13 @@ export default class BuyForm extends React.Component {
                       </Text>
                     </View>
                       <Button
+                        type="block"
+                        color="primary"
                         buttonStyle={style.buyButton}
                         titleStyle={style.buyButtonTitle}
                         disabled={_.isEmpty(values["items"])}
                         onPress={() => this.buy({values, resetForm})}
-                        icon={{name: "shopping-cart", color: white }}
+                        icon="shopping-cart"
                         title="Buy"
                       />
                   </View>

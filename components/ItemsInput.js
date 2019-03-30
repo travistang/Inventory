@@ -164,7 +164,7 @@ export default class ItemsInput extends React.Component {
   removePreviewItem({ name }) {
     return this.setState({
       itemChanges: this.state.itemChanges.filter( i => i.name !== name)
-    })
+    }, () => this.reportProposedItemChange())
   }
   // the component to be rendered on the left of the item card at the top.
   // this is meant to show the differences of the quantity given certain input.
