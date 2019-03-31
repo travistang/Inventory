@@ -217,8 +217,8 @@ export class Transactions {
     const isIncome = amount > 0
     return await this.addTransactionRecord({
       name,
-      from: null,
-      to: accountId,
+      from: isIncome?null:accountId,
+      to: isIncome?accountId:null,
       obtainedAmount: isIncome?amount:0,
       consumedAmount: isIncome?0:-amount, // because amount would be < 0, so consumedAmount is > 0
       transactionType: isIncome? INCOME : SPEND

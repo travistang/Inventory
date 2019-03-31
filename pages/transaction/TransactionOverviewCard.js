@@ -80,10 +80,20 @@ export default class TransactionCard extends React.Component {
       SELL, INCOME, CONSUME, SPEND
     } = Transactions.TransactionTypes
     switch(type) {
+      // there were errors in previous inplementation in spend / income recording
+      // therefore fromCurrency || toCurrency is used because there should be exactly one of them is not null
       case BUY:
+      case SPEND:
         content = (
           <Text style={{...style.buy, ...style.amountString}}>
-            -{FormatCurrency(consumedAmount,fromCurrency)}
+            -{FormatCurrency(consumedAmount,fromCurrency || toCurrency)}
+          </Text>
+        )
+        break
+      case INCOME:
+        content = (
+          <Text style={{...style.buy, ...style.amountString}}>
+            +{FormatCurrency(obtainedAmount,toCurrency)}
           </Text>
         )
         break
@@ -238,7 +248,7 @@ const style = StyleSheet.create({
     alignItems: 'center'
   },
   name: {
-    color: textPrimary,
+    color: textSecondary,
     fontWeight: 'bold'
   },
   date: {

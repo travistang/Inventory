@@ -63,10 +63,11 @@ export const colorForType = (type) => {
   switch(type) {
     case BUY:
     case SPEND:
-      return danger
+      return primary
     case TRANSFER:
       return info
     case INCOME:
+    case CONSUME:
       return secondary
     default:
       return textSecondary

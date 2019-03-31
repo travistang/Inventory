@@ -1,5 +1,4 @@
 import React from 'react'
-import Background from '../../components/Background'
 import DetailsHeaderSection from './detailsHeader'
 import PropTypes from 'prop-types'
 import {
@@ -11,13 +10,17 @@ import {
   CommonHeaderStyle,
   FormatItemAmount
 } from '../../utils'
+import {
+  HeaderComponent,
+  ItemCard,
+  Background
+} from '../../components'
 import { Transactions } from '../../models/transaction'
 import ItemModel from '../../models/items'
 import { withNavigation } from 'react-navigation'
-import HeaderComponent from '../../components/HeaderComponent'
 import { colors , colorForType } from '../../theme'
 import Icon from 'react-native-vector-icons/dist/FontAwesome'
-import ItemCard from '../../components/ItemCard'
+
 const {
   CONSUME, SELL, BUY
 } = Transactions.TransactionTypes

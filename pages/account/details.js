@@ -7,8 +7,15 @@ import {
   CommonHeaderStyle,
   addOpacity
 } from '../../utils'
-import HeaderComponent from '../../components/HeaderComponent'
-import Background from '../../components/Background'
+import {
+  HeaderComponent,
+  Background,
+  ActionBox,
+  AccountTrendLine,
+  CenterNotice,
+  ContentCard
+} from '../../components'
+
 import {
   ScrollView,
   RefreshControl,
@@ -16,7 +23,6 @@ import {
   View, TouchableOpacity,
   Dimensions, Text
 } from 'react-native'
-import CenterNotice from '../../components/CenterNotice'
 import * as _ from 'lodash'
 import PropTypes from 'prop-types'
 import AccountCard from './AccountCard'
@@ -24,8 +30,6 @@ import AccountModel from '../../models/account'
 import TransactionModel from '../../models/transaction'
 import Icon from 'react-native-vector-icons/dist/FontAwesome'
 import { FormatCurrency } from '../../utils'
-import ActionBox from '../../components/ActionBox'
-import AccountTrendLine from '../../components/AccountTrendLine'
 import DetailsHeader from './detailsHeader'
 import { Transactions } from '../../models/transaction'
 import { colors, shadow } from '../../theme'
@@ -184,28 +188,16 @@ export default class AccountDetailsPage extends React.Component {
       })
     }
   }
-  cardHeader({ title, icon}) {
-    return (
-      <View style={style.sectionCardHeader}>
-        <Icon name={icon} size={16} />
-        <View style={style.sectionCardHeaderTextContainer}>
-          <Text style={style.sectionCardHeaderText}>
-            {title.toUpperCase()}
-          </Text>
-        </View>
-      </View>
-    )
-  }
+
   surplusTrendCard() {
     const { min, max,
       account: { currency }
     } = this.state
     return (
-      <View style={style.sectionCard}>
-        {this.cardHeader({
-          title: "surplus trend",
-          icon: "arrow-up"
-        })}
+      <ContentCard
+        title="surplus trend"
+        icon="arrow-up"
+      >
         <AccountTrendLine
           width="100%"
           color={secondary}
@@ -228,7 +220,7 @@ export default class AccountDetailsPage extends React.Component {
             </Text>
           </View>
         </View>
-      </View>
+      </ContentCard>
     )
   }
 
@@ -252,20 +244,13 @@ export default class AccountDetailsPage extends React.Component {
         graphWidth: width // compensate padding
       })
     }
-    /*
-    chartConfig={{
-      backgroundColor: white,
-      color: (opacity = 1) => addOpacity(secondary, opacity)
-    }}
-    */
+
     return (
-      <View
+      <ContentCard
+        title="Transaction frequencies"
+        icon="exchange"
         onLayout={reportInnerWidth.bind(this)}
-        style={style.sectionCard}>
-        {this.cardHeader({
-          title: "Transaction frequencies",
-          icon: "exchange"
-        })}
+      >
         <ContributionGraph
           values={data}
           endDate={new Date()}
@@ -280,8 +265,7 @@ export default class AccountDetailsPage extends React.Component {
             color: (opacity = 1) => addOpacity(secondary, opacity)
           }}
         />
-
-      </View>
+    </ContentCard>
     )
   }
   render() {
@@ -312,25 +296,15 @@ const style = StyleSheet.create({
   headerRight: {
     marginRight: 16
   },
-  sectionCardHeader: {
-    flexDirection: 'row'
-  },
-  sectionCardHeaderTextContainer: {
-    marginLeft: 4,
-  },
+
+
   mainContainer: {
     margin: 16,
   },
   header: {
     backgroundColor: secondary
   },
-  sectionCard: {
-    borderRadius: 16,
-    padding: 16,
-    marginVertical: 8,
-    zIndex: 2,
-    backgroundColor: white
-  },
+
   buttonGroup: {
     flexDirection: 'row',
     marginVertical: 8,
