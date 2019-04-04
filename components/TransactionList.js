@@ -1,5 +1,5 @@
 import React from 'react'
-import Card from './Card'
+import ContentCard from './ContentCard'
 import {
   TouchableOpacity,
   StyleSheet
@@ -8,16 +8,22 @@ import TransactionOverviewCard from './TransactionOverviewCard'
 import { withNavigation } from 'react-navigation'
 import PropTypes from 'prop-types'
 import { TransactionPropTypes } from '../utils'
+import moment from 'moment'
 /*
   Return a component that renders the transaction list
 */
 class TransactionList extends React.Component {
   static defaultProps = {
-    transactions: []
+    transactions: [],
+    title: "",
+    icon: ""
   }
 
   static propTypes = {
-    transactions: PropTypes.arrayOf(TransactionPropTypes)
+    transactions: PropTypes.arrayOf(TransactionPropTypes),
+    selectedDay: PropTypes.instanceOf(Date),
+    title: PropTypes.string,
+    icon: PropTypes.string,
   }
 
   gotoDetails(transaction) {
@@ -26,9 +32,10 @@ class TransactionList extends React.Component {
     })
   }
   render() {
-    const { transactions } = this.props
+    const { transactions, ...props } = this.props
     return (
-      <Card
+      <ContentCard
+        {...props}
         style={style.container}>
         {
           transactions.map((trans, i) => (
@@ -42,7 +49,7 @@ class TransactionList extends React.Component {
 
           ))
         }
-      </Card>
+      </ContentCard>
     )
   }
 }
@@ -51,6 +58,6 @@ export default withNavigation(TransactionList)
 
 const style = StyleSheet.create({
   container: {
-
+    margin: 16,
   }
 })

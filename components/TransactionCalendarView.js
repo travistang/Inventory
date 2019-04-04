@@ -12,10 +12,13 @@ const {
   textSecondary
  } = colors
 
+import * as _ from 'lodash'
+
 export default class TransactionCalendarView extends React.Component {
   static defaultProps = {
     transactionsOfMonth: [],
-    themeColor: primary
+    themeColor: primary,
+    selectedDays: []
   }
   static propTypes = {
     onDaySelected: PropTypes.func.isRequired,
@@ -23,10 +26,14 @@ export default class TransactionCalendarView extends React.Component {
     transactionsOfMonth: PropTypes.arrayOf(
       TransactionPropTypes
     ).isRequired,
+    selectedDays: PropTypes.arrayOf(PropTypes.object),
     themeColor: PropTypes.string
   }
   getMarkedDates() {
-    const { transactionsOfMonth, themeColor } = this.props
+    const {
+      transactionsOfMonth,
+      themeColor,
+      selectedDays } = this.props
     // prepare a "YYYY-mm-dd: { marked: true}" pair
     const markedDates = transactionsOfMonth.map(trans => ({
       [moment(trans.date).format('YYYY-MM-DD')]:
@@ -34,7 +41,15 @@ export default class TransactionCalendarView extends React.Component {
     })).reduce(
       (markedDates, date) => ({...markedDates, ...date}),
     {})
-    return markedDates
+    const selectedDates = selectedDays.map(date => ({
+      [moment(date).format('YYYY-MM-DD')]:
+        {selected: true}
+    })).reduce(
+      (markedDates, date) => ({...markedDates, ...date}),
+    {})
+
+    const res = _.merge(markedDates, selectedDates)
+    return res
   }
   getTheme() {
     const { themeColor } = this.props
@@ -49,13 +64,21 @@ export default class TransactionCalendarView extends React.Component {
       dotColor: themeColor
     }
   }
+  onDayPress(day) {
+    const { onDaySelected } = this.props
+    let correctedDay = moment(day).clone().subtract(1, 'months')
+    if(!correctedDay.isValid()) {
+      correctedDay = moment(day).clone().startOf('month').subtract(1, 'days')
+    }
+    onDaySelected(correctedDay)
+  }
   render() {
     const { onDaySelected, onMonthChanged } = this.props
     return (
       <Calendar
         hideExtraDays={true}
         maxDate={new Date()}
-        onDayPressed={onDaySelected}
+        onDayPress={this.onDayPress.bind(this)}
         markedDates={this.getMarkedDates()}
         onMonthChange={onMonthChanged}
         style={style.container}

@@ -16,3 +16,7 @@ export TextInput from './TextInput'
 export ContentCard from './ContentCard'
 export TransactionCalendarView from './TransactionCalendarView'
 export TransactionList from './TransactionList'
+export SpendIncomeBanner from './SpendIncomeBanner'
+
+
+export Icon from 'react-native-vector-icons/dist/FontAwesome'

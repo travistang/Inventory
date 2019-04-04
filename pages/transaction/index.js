@@ -16,7 +16,8 @@ import {
   Card,
   HeaderComponent,
   TransactionCalendarView,
-  TransactionList
+  TransactionList,
+  SpendIncomeBanner
 } from '../../components'
 
 import { withNavigation } from 'react-navigation'
@@ -95,7 +96,8 @@ class TransactionPage extends React.Component {
     // since the month given by the calendar component is one month behind,
     // subtract the differences if months are provided (which must be from the calendar)
     const finalMonth =
-      month?moment(month).add(-1, 'months'):moment()
+      month?moment(month)
+        .startOf('month').add(-1, 'months'):moment()
 
     this.setState({
       monthSelected: finalMonth,
@@ -108,25 +110,51 @@ class TransactionPage extends React.Component {
     })
 
   }
+  transactionListTitle() {
+    const { daySelected } = this.state
+    const dateString = moment(daySelected).format('YYYY-MM-DD')
+    return `Transaction on ${dateString}`.toUpperCase()
+  }
+  getSelectedTransactions() {
+    const { transactions, daySelected } = this.state
+    if(!daySelected) return transactions
+    return transactions.filter(({date}) =>
+      moment(date).isSame(moment(daySelected), 'day'))
+  }
   render() {
-    const { transactions, isExportDialogOpen } = this.state
+    const {
+      transactions,
+      isExportDialogOpen,
+      daySelected
+    } = this.state
+    const transactionsOfDay = this.getSelectedTransactions()
     return (
       <Background>
         <ExportRecordOverlay
           isOpen={isExportDialogOpen}
           onClose={this.onExportRecordOverlayClose.bind(this)}
         />
-
+        <SpendIncomeBanner
+          transactions={transactionsOfDay}
+        />
         <TransactionCalendarView
           transactionsOfMonth={transactions}
           onDaySelected={this.onDaySelected.bind(this)}
+          selectedDays={[daySelected]}
           onMonthChanged={this.fetchTransactionOfMonth.bind(this)}
         />
+        {
+          daySelected && (
+            <TransactionList
+              title={this.transactionListTitle()}
+              icon="exchange"
+              style={style.transactionList}
+              transactions={transactionsOfDay}
+            />
+          )
+        }
 
-        <TransactionList
-          style={style.transactionList}
-          transactions={transactions}
-        />
+
       </Background>
     )
   }
