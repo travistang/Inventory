@@ -13,35 +13,11 @@ import { TransactionPropTypes, FormatCurrency } from '../../utils'
 import { Transactions } from '../../models/transaction'
 import AccountModel from '../../models/account'
 import { withNavigation } from 'react-navigation'
-
+import moment from 'moment'
+import Icon from 'react-native-vector-icons/dist/FontAwesome'
 class DetailsHeaderSection extends React.Component {
   static propTypes = {
     transaction: TransactionPropTypes,
-  }
-
-  constructor(props) {
-    super(props)
-
-    this.state = {
-      fromAccount: null,
-      toAccount: null
-    }
-  }
-
-  componentDidMount() {
-    const { from, to } = this.props.transaction
-    if (from) {
-      AccountModel.getAccountById(from)
-        .then(fromAccount => this.setState({
-          fromAccount
-        }))
-    }
-    if (to) {
-      AccountModel.getAccountById(to)
-        .then(toAccount => this.setState({
-          toAccount
-        }))
-    }
   }
 
   getQuantityDescription() {
@@ -53,27 +29,34 @@ class DetailsHeaderSection extends React.Component {
       transactionType,
       consumedAmount,
       obtainedAmount,
+      from: fromAccount,
+      to: toAccount,
       items =  []
     } = this.props.transaction
     const numItems = items.length || 0
     const {
-      BUY, TRANSFER, SELL, CRAFT, CONSUME, SPEND
+      BUY, TRANSFER, SELL, CRAFT, CONSUME, SPEND, INCOME
     } = Transactions.TransactionTypes
-    const {
-      fromAccount, toAccount
-    } = this.state
+
 
     switch(transactionType) {
       case BUY:
       case SPEND:
-        if(!fromAccount) return null
+        const account = fromAccount || toAccount
+        const amount = consumedAmount || obtainedAmount || 0
         return (
           <Text
             adjustsFontSizeToFit={true}
             numberOfLines={1}
             minimumFontScale={0.01}
             style={style.quantity}>
-            {FormatCurrency(consumedAmount, fromAccount.currency)}
+            {FormatCurrency(amount, account.currency)}
+          </Text>
+        )
+      case INCOME:
+        return (
+          <Text>
+              {FormatCurrency(obtainedAmount, fromAccount.currency)}
           </Text>
         )
       case TRANSFER:
@@ -113,22 +96,7 @@ class DetailsHeaderSection extends React.Component {
       account
     })
   }
-  // get a mini view of the info of an account
-  getAccountView(account) {
-    const { name, amount, currency } = account
-    return (
-      <TouchableOpacity
-        onPress={() => this.toAccount(account)}
-        style={style.accountInfo}>
-        <Text style={style.accountName}>
-          {name}
-        </Text>
-        <Text style={style.accountAmount}>
-          {FormatCurrency(amount, currency)}
-        </Text>
-      </TouchableOpacity>
-    )
-  }
+
   /*
     Auxillary info of this value
     If no money is involved (consume, craft), nothing is shown here.
@@ -145,10 +113,18 @@ class DetailsHeaderSection extends React.Component {
   getAuxillaryInfo() {
     const {
       transactionType,
+      date,
       consumedAmount,
       obtainedAmount
     } = this.props.transaction
-
+    return (
+      <View style={style.auxillaryInfoContainer}>
+        <Icon name="calendar" style={style.calendarIcon}/>
+        <Text style={style.auxilaryText}>
+          {moment(date).format('DD/MM/YYYY HH:mm')}
+        </Text>
+      </View>
+    )
     const {
       BUY, TRANSFER, SELL, CRAFT, CONSUME, SPEND
     } = Transactions.TransactionTypes
@@ -257,5 +233,17 @@ const style = StyleSheet.create({
   },
   accountAmount: {
     fontWeight: 'bold'
-  }
+  },
+  auxillaryInfoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  calendarIcon: {
+    marginRight: 8
+  },
+  auxilaryText: {
+    color: textColor
+  },
+
 })

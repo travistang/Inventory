@@ -2,7 +2,7 @@ import { DB } from './'
 import * as Yup from 'yup'
 import AccountModel from './account'
 import ItemModel from './items'
-import * as moment from 'moment'
+import moment from 'moment'
 import * as _ from 'lodash'
 /*
   Transaction is a record the records the CHANGES OF ACCOUNTS' SURPLUS AND ITEMS.
@@ -43,7 +43,51 @@ export class Transactions {
       CONSUME, CRAFT
     ]
   }
-
+  /*
+    Something like "populate" in Mongoose, that recovers "from" and "to" from an object Id to account info
+  */
+  static async expandTransactions({
+    from,
+    to ,
+    items,
+    ...transaction}) {
+    let expandedAccountRecord = transaction
+    return await AccountModel.getAccountById(from)
+      // get from account
+      .then(from => {
+        expandedAccountRecord = {
+          ...expandedAccountRecord,
+          from
+        }
+      })
+      // get to account
+      .then(() => AccountModel.getAccountById(to))
+      .then(to => {
+        expandedAccountRecord = {
+          ...expandedAccountRecord,
+          to
+        }
+      })
+      // get details of each items
+      .then(() => Promise.all(
+        items.map(({name, ...item}) =>
+          ItemModel.getItemByName(name)
+            .then(originalItem => ({
+                ...originalItem,
+                ...item
+              })
+            ))
+      ))
+      // put expanded items to the final result
+      .then(items => {
+        expandedAccountRecord = {
+          ...expandedAccountRecord,
+          items
+        }
+      })
+      // finally return the "expanded" record
+      .then(() => expandedAccountRecord)
+  }
   static get initialTransactionValues() {
     return {
       name: '',
@@ -51,6 +95,14 @@ export class Transactions {
       obtainedAmount: 0,
       from: null,
       to: null,
+      tags: [],
+      location: {
+        coordinate: {
+          lat: 0,
+          lng: 0
+        },
+        name: null,
+      },
       date: moment().toDate(),
       items: [],
       transactionType:
@@ -74,6 +126,18 @@ export class Transactions {
       // ID's of the items
       from: Yup.string(),
       to: Yup.string(),
+      tags: Tup.array().of(
+        Yup.string()
+      ),
+      // name can be added additionally or found by reverse geoencoding.
+      // coordinates should be discovered by the devices or selected by user
+      location: Yup.object().shape({
+        coordinate: Yup.object().shape({
+          lat: Yup.number().required(),
+          lng: Yup.number().required()
+        }).required(),
+        name: Yup.string(),
+      }),
       date: Yup.date().required().min(new Date()),
       items: Yup.array().of(
         Yup.object().shape({
@@ -99,9 +163,31 @@ export class Transactions {
     })
   }
   /*
+
+  */
+  async getTransactionOfMonthOfDate(date = moment()) {
+    const startOfMonth = moment(date).startOf('month').toDate()
+    const endOfMonth = moment(date).endOf('month').toDate()
+    const transactionsOfMonth = await this.DB.findAsync({
+      type: Transactions.type,
+      $and: [
+        { date: { $gte: startOfMonth}},
+        { date: { $lte: endOfMonth }}
+      ]
+    })
+
+    return await Promise.all(
+      transactionsOfMonth.map(Transactions.expandTransactions)
+    )
+  }
+  /*
     Recover the surplus of the account given a transaction and the surplus after that.
     i.e. if an account as surplus A, went through as transaction T, and has new surplus B,
     then this function is (T, B) -> A
+
+    In other words, given an account and it's currentAmount (more like the "intermediate amount" across the transaction history of this account),
+    and a transaction you want to revert,
+    it converts
   */
   getPreviousBalanceFromTransaction({
     transaction,

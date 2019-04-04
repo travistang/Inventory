@@ -1,18 +1,18 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import TransactionModel from '../../models/transaction'
-import { Transactions } from '../../models/transaction'
-import AccountModel from '../../models/account'
-import Card from '../../components/Card'
+import TransactionModel from '../models/transaction'
+import { Transactions } from '../models/transaction'
+import AccountModel from '../models/account'
+import Card from './Card'
 import {
   View, StyleSheet
 } from 'react-native'
-import { colors, colorForType } from '../../theme'
+import { colors, colorForType } from '../theme'
 import {
   Badge, Text
 } from 'react-native-elements'
 import moment from 'moment'
-import { FormatCurrency } from '../../utils'
+import { FormatCurrency, TransactionPropTypes } from '../utils'
 import Icon from 'react-native-vector-icons/dist/FontAwesome'
 
 /*
@@ -44,31 +44,15 @@ import Icon from 'react-native-vector-icons/dist/FontAwesome'
 export default class TransactionCard extends React.Component {
   static propTypes = {
     // expect transaction to have the following structure:
-    transaction: PropTypes.shape({
-        name: PropTypes.string.isRequired,
-        date: PropTypes.instanceOf(Date),
-        from: PropTypes.string,
-        to: PropTypes.string,
-        consumedAmount: PropTypes.number,
-        obtainedAmount: PropTypes.number,
-        type: PropTypes.string.isRequired,
-        items: PropTypes.arrayOf(
-          PropTypes.shape({
-            name: PropTypes.string.isRequired,
-            amount: PropTypes.number.isRequired,
-            cost: PropTypes.number
-          })
-        )
-      }).isRequired,
+    transaction: TransactionPropTypes,
     containerStyle: PropTypes.object
   }
+
   getLeftContainer({
     name, date, items, type,
+    from: fromAccount, to: toAccount,
     consumedAmount, obtainedAmount,
   }) {
-    const {
-      fromAccount, toAccount
-    } = this.state
 
     const fromCurrency = fromAccount && fromAccount.currency || ""
     const toCurrency = toAccount && toAccount.currency || ""
@@ -159,30 +143,8 @@ export default class TransactionCard extends React.Component {
       </View>
     )
   }
-  loadAccountInfo() {
-    const { from, to } = this.props.transaction
-    if(from) {
-      AccountModel.getAccountById(from).then(ac => {
-        this.setState({ fromAccount: ac })
-      })
-    }
-    if(to) {
-      AccountModel.getAccountById(to).then(ac => {
-        this.setState({ toAccount: ac })
-      })
-    }
-  }
   constructor(props) {
     super(props)
-
-    this.state = {
-      fromAccount: null,
-      toAccount: null,
-    }
-  }
-  // load the account info and put it to
-  componentDidMount() {
-    this.loadAccountInfo()
   }
   render() {
     const {

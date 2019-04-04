@@ -13,16 +13,24 @@ import {
 import {
   HeaderComponent,
   ItemCard,
-  Background
+  Background,
+  ContentCard,
+  AccountCard,
 } from '../../components'
-import { Transactions } from '../../models/transaction'
+
+import AccountModel from '../../models/account'
+import {
+  Transactions,
+  Transaction as TransactionModel
+} from '../../models/transaction'
+// import TransactionModel from '../../models/transaction'
 import ItemModel from '../../models/items'
 import { withNavigation } from 'react-navigation'
 import { colors , colorForType } from '../../theme'
 import Icon from 'react-native-vector-icons/dist/FontAwesome'
 
 const {
-  CONSUME, SELL, BUY
+  CONSUME, SELL, BUY, SPEND
 } = Transactions.TransactionTypes
 
 class TransactionDetailsPage extends React.Component {
@@ -56,7 +64,8 @@ class TransactionDetailsPage extends React.Component {
     )
   }
   getMainContent(transaction) {
-    const { name, items, from, to, transactionType } = transaction
+    const { name, items, transactionType} = transaction
+    const { fromAccount, toAccount } = this.state.transaction
     switch(transactionType) {
       case BUY:
       case CONSUME:
@@ -71,6 +80,20 @@ class TransactionDetailsPage extends React.Component {
             }
           </View>
         )
+      case SPEND:
+        if(!fromAccount && !toAccount) return null
+        return (
+          <View>
+            <ContentCard
+              style={style.fromAccountContentCard}
+              title="From account"
+              icon="bank"
+            >
+              <AccountCard account={fromAccount || toAccount }
+              />
+            </ContentCard>
+          </View>
+        )
 
 
       default:
@@ -81,25 +104,8 @@ class TransactionDetailsPage extends React.Component {
     const transaction = this.props.navigation.getParam(
       'transaction'
     )
-    this.setState({ transaction: {...transaction, items: []} }, () => {
-      transaction.items.forEach(
-        item => {
-          // obtain the units and original info of such item,
-          // then append it to the state
-          ItemModel.getItemByName(item.name)
-            .then(originalItem => {
-              this.setState({
-                transaction: {
-                  ...this.state.transaction,
-                  items: (this.state.transaction.items || []).concat({
-                    ...originalItem,
-                    ...item,
-                  })
-                }
-              })
-            })
-      })
-    })
+    this.setState({ transaction })
+
   }
   getSubTitle({ transactionType }) {
     let subtitleParams = {
@@ -129,6 +135,7 @@ class TransactionDetailsPage extends React.Component {
         <DetailsHeaderSection
           transaction={transaction}
         />
+
         {this.getSubTitle(transaction)}
         <View style={style.mainContainer}>
           {this.getMainContent(transaction)}
@@ -166,5 +173,9 @@ const style = StyleSheet.create({
     // justifyContent: 'flex-start',
     // alignItems: 'flex-start'
 
+  },
+  fromAccountContentCard: {
+    paddingHorizontal: 0,
+    backgroundColor: 'transparent'
   }
 })

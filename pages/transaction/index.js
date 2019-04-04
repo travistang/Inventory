@@ -10,14 +10,23 @@ import {
   Text,
   Button
 } from 'react-native-elements'
+
+import {
+  Background,
+  Card,
+  HeaderComponent,
+  TransactionCalendarView,
+  TransactionList
+} from '../../components'
+
 import { withNavigation } from 'react-navigation'
 import ExportRecordOverlay from './exportRecordOverlay'
-import Card from '../../components/Card'
-import Background from '../../components/Background'
-import HeaderComponent from '../../components/HeaderComponent'
+
 import TransactionModel from '../../models/transaction'
-import TransactionOverviewCard from './TransactionOverviewCard'
 import { exportDB } from '../../models'
+
+import moment from 'moment'
+
 import {
   CommonHeaderStyle
 } from '../../utils'
@@ -52,105 +61,81 @@ class TransactionPage extends React.Component {
     this.numRecords = 10
 
     this.state = {
-      // current page being loaded
-      page: -1,
-      // total page possible for transactions given numRecords
-      totalPage: 0,
-      // the transaction records loaded
+      // transaction of the MONTH
       transactions: [],
 
-      // flag for refreshing
-      refreshing: false,
-
       // flag for toggling export dialog
-      isExportDialogOpen: false
+      isExportDialogOpen: false,
+
+      monthSelected: moment(),
+      daySelected: null,
     }
-  }
-  // reload all transaction records.
-  reloadTransactionRecords() {
-    this.setState({
-      page: -1,
-      totalPage: 0,
-      transactions:[],
-      refreshing: true
-    },
-    () => this.loadRecentTransactionRecords())
-  }
-  // load the NEXT page of transaction
-  // also INCREMENT the page of transaction
-  loadRecentTransactionRecords() {
-    const page = this.state.page + 1
-    TransactionModel.getTotalNumberOfTransactions()
-      .then(numTransactions => Math.floor(numTransactions / this.numRecords))
-      .then(totalPage => {
-        this.setState({
-          totalPage
-        })
-      })
-      .then(() => TransactionModel.getRecentTransactions({
-            numRecords: this.numRecords,
-            page
-      }))
-      .then(trans => {
-        this.setState({
-          page,
-          transactions: this.state.transactions.concat(trans)
-        })
-      })
-      .then(() => {
-        this.setState({
-          refreshing: false
-        })
-      })
   }
 
   componentDidMount() {
-    this.loadRecentTransactionRecords()
     // deliver the "setState" function to the header
     this.props.navigation.setParams({
       setState: this.setState.bind(this)
     })
+
+    this.fetchTransactionOfMonth(null)
   }
-  gotoDetails(transaction) {
-    this.props.navigation.navigate('TransactionDetailsPage', {
-      transaction
-    })
-  }
+
   onExportRecordOverlayClose() {
     this.setState({isExportDialogOpen: false})
+  }
+
+  onDaySelected(daySelected) {
+    this.setState({
+      daySelected
+    })
+  }
+  // when months are fetched, reset the selected day
+  async fetchTransactionOfMonth(month = moment()) {
+    // since the month given by the calendar component is one month behind,
+    // subtract the differences if months are provided (which must be from the calendar)
+    const finalMonth =
+      month?moment(month).add(-1, 'months'):moment()
+
+    this.setState({
+      monthSelected: finalMonth,
+      daySelected: null
+    })
+
+    const transactions = await TransactionModel.getTransactionOfMonthOfDate(finalMonth)
+    this.setState({
+      transactions
+    })
+
   }
   render() {
     const { transactions, isExportDialogOpen } = this.state
     return (
-      <Background
-        refreshControl={
-          <RefreshControl
-            refreshing={this.state.refreshing}
-            onRefresh={this.reloadTransactionRecords.bind(this)}
-          />
-        }
-      >
-
+      <Background>
         <ExportRecordOverlay
           isOpen={isExportDialogOpen}
           onClose={this.onExportRecordOverlayClose.bind(this)}
         />
 
-        {
-          transactions.map((trans, i) => (
-            <TouchableOpacity
-              key={i}
-              onPress={() => this.gotoDetails(trans)}>
-                <TransactionOverviewCard
-                   transaction={trans}
-                />
-            </TouchableOpacity>
+        <TransactionCalendarView
+          transactionsOfMonth={transactions}
+          onDaySelected={this.onDaySelected.bind(this)}
+          onMonthChanged={this.fetchTransactionOfMonth.bind(this)}
+        />
 
-          ))
-        }
+        <TransactionList
+          style={style.transactionList}
+          transactions={transactions}
+        />
       </Background>
     )
   }
 }
 
 export default withNavigation(TransactionPage)
+
+const style = StyleSheet.create({
+  transactionList: {
+    marginHorizontal: 16,
+  }
+})

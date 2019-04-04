@@ -19,7 +19,7 @@ export const FormatCurrency = (amount, currency) => {
     case "PLN":
       return `${negativeSign}${value}zł`
     default:
-      return `${negativeSign}${value}${currency}`
+      return `${negativeSign}${value} ${currency}`
   }
 }
 
@@ -35,11 +35,23 @@ export const CommonHeaderStyle = {
   shadowColor: 'transparent'
 }
 
+export const AccountPropTypes = PropTypes.shape({
+  name: PropTypes.string.isRequired,
+  currency: PropTypes.string.isRequired,
+  amount: PropTypes.number.isRequired,
+}).isRequired
+
 export const TransactionPropTypes = PropTypes.shape({
   name: PropTypes.string.isRequired,
   date: PropTypes.instanceOf(Date),
-  from: PropTypes.string,
-  to: PropTypes.string,
+  from: PropTypes.oneOfType([
+    PropTypes.string,
+    AccountPropTypes
+  ]).isRequired,
+  to: PropTypes.oneOfType([
+    PropTypes.string,
+    AccountPropTypes
+  ]).isRequired,
   consumedAmount: PropTypes.number,
   obtainedAmount: PropTypes.number,
   type: PropTypes.string.isRequired,
@@ -52,9 +64,7 @@ export const TransactionPropTypes = PropTypes.shape({
   )
 }).isRequired
 
-export const AccountPropTypes = PropTypes.shape({
 
-}).isRequired
 
 // https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
 function hexToRgb(hex) {

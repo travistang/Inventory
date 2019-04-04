@@ -44,7 +44,7 @@ export default function({
 }) {
   return (
     <Card
-    style={{...style.container, customStyle}}
+    style={{...style.container, ...customStyle}}
       {...props}
     >
       {cardHeader({ title, icon })}
