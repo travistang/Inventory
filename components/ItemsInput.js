@@ -324,7 +324,7 @@ export default class ItemsInput extends React.Component {
       <Overlay
         isVisible
         fullScreen
-        overlaySryle={{margin: 0}}
+        overlayStyle={{margin: 0}}
         containerStyle={{padding: 0, backgroundColor: background}}
         onBackdropPress={onBackdropPress}
 

@@ -64,6 +64,12 @@ export const TransactionPropTypes = PropTypes.shape({
   )
 }).isRequired
 
+export const LocationPropTypes = PropTypes.shape({
+  name: PropTypes.string,
+  latitude: PropTypes.number.isRequired,
+  longitude: PropTypes.number.isRequired,
+
+})
 
 
 // https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb

@@ -12,7 +12,7 @@ import {
 
 import {
   FormatCurrency
-} from '../utils'
+} from 'utils'
 import * as Yup from 'yup'
 import * as _ from 'lodash'
 import {
@@ -22,8 +22,15 @@ import {
   Card,
   AccountCard,
   DropdownInput,
-  Background
+  Background,
+  LocationPicker
 } from '../components'
+
+import {
+  LocationSchema, LocationInitialValues,
+  ItemSchema
+} from 'models/schema'
+
 import AccountModel from '../models/account'
 import { NavigationEvents } from "react-navigation"
 
@@ -54,6 +61,7 @@ export default class BuyForm extends React.Component {
       fromAccount: (account && account._id ) ||
         (accountList.length && accountList[0]._id) || null,
       name: "",
+      location: LocationInitialValues,
       date: new Date(),
       items: []
     }
@@ -61,12 +69,9 @@ export default class BuyForm extends React.Component {
   validationSchema() {
     return Yup.object().shape({
       items: Yup.array().required().of(
-        Yup.object().shape({
-          name: Yup.string().required(),
-          amount: Yup.number().moreThan(0).required(),
-          cost: Yup.number().moreThan(0).required()
-        })
+        ItemSchema
       ),
+      location: LocationSchema,
       name: Yup.string().required(),
       date: Yup.date().required(),
       fromAccount: Yup.string().required()
@@ -151,6 +156,16 @@ export default class BuyForm extends React.Component {
                     values={values}
                     iconName="tag"
                     setFieldValue={setFieldValue}
+                  />
+                  <LocationPicker
+                    label="Location"
+                    name="location"
+                    errors={errors}
+                    values={values}
+                    iconName="map"
+                    setFieldValue={setFieldValue}
+                    name="location"
+
                   />
                 </Card>
 

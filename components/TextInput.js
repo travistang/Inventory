@@ -6,7 +6,7 @@ import { View } from 'react-native'
 import PropTypes from 'prop-types'
 import { Fumi } from 'react-native-textinput-effects'
 import Icon from 'react-native-vector-icons/dist/FontAwesome'
-import { colors } from '../theme'
+import { colors } from 'theme'
 const { textPrimary, textSecondary, white } = colors
 export default class TextInput extends React.Component {
   static propTypes = {
@@ -18,6 +18,7 @@ export default class TextInput extends React.Component {
     icon: PropTypes.string,
     iconColor: PropTypes.string,
     style: PropTypes.object,
+    disabled: PropTypes.bool,
 
     // possible types that appear for configuring the TextInput
     controlled: PropTypes.bool,
@@ -66,7 +67,6 @@ export default class TextInput extends React.Component {
       setFieldValue,
       ...props
     } = this.props
-    const errorMessage = errors[name]
     return (
       <Fumi
         label={label}
