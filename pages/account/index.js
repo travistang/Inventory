@@ -3,26 +3,31 @@ import {
   StyleSheet,
   View,
   TouchableOpacity,
-  RefreshControl
+  RefreshControl,
+  Text
 } from 'react-native'
 import {
   CommonHeaderStyle
-} from '../../utils'
+} from 'utils'
 import AddAccountOverlay from './addAccountOverlay'
 import {
-  Text,
   Button
 } from 'react-native-elements'
-import HeaderComponent from '../../components/HeaderComponent'
-import Background from '../../components/Background'
-import { StackActions } from 'react-navigation'
-import AccountCard from '../../components/AccountCard'
-import Icon from 'react-native-vector-icons/dist/FontAwesome'
-import AccountModel from '../../models/account'
-import { colors } from '../../theme'
-const { textSecondary } = colors
-export default class AccountPage extends React.Component {
 
+import {
+  HeaderComponent,
+  Background,
+  AccountCard,
+  Icon
+} from 'components'
+import AccountModel from 'models/account'
+
+import { StackActions } from 'react-navigation'
+
+import { colors } from 'theme'
+const { textSecondary } = colors
+
+export default class AccountPage extends React.Component {
   static navigationOptions = ({navigation}) => {
     const {params = {}} = navigation.state
     return {

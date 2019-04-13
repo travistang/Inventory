@@ -2,6 +2,8 @@ import { DB } from './'
 import * as Yup from 'yup'
 import AccountModel from './account'
 import ItemModel from './items'
+import LocationModel from './location'
+
 import moment from 'moment'
 import * as _ from 'lodash'
 /*
@@ -271,6 +273,7 @@ export class Transactions {
         ({...item, amount: -item.amount})
       ).map( async (item, i) => {
         const result = await ItemModel.add(item)
+        if(!result) return 
         return ({
           ...item,
           // because it is turned to negative, so turn it back to positive again
@@ -432,6 +435,7 @@ export class Transactions {
     fromAccount,
     items, // this is a list!
     name,
+    location,
     date,
   }) {
     try {

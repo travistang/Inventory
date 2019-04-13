@@ -15,7 +15,7 @@ import {
 } from 'components'
 
 import { isEqual } from 'lodash'
-import MapView, {Marker} from 'react-native-maps-osmdroid'
+import MapView, {Marker, UrlTile} from 'react-native-maps-osmdroid'
 
 import Geocoder from 'react-native-geocoder'
 
@@ -179,7 +179,7 @@ export default class MapViewOverlay extends React.Component {
     const shouldSaveLocation = !!inputName.trim()
     const name = shouldSaveLocation?inputName:reversedGeoencodingName
     this.props.onLocationChosen({
-      region,
+      location,
       name,
       shouldSaveLocation
     })
@@ -233,6 +233,15 @@ export default class MapViewOverlay extends React.Component {
                 onRegionChangeComplete={this.updateReverseGeoencoding.bind(this)}
                 initialRegion={this.initialRegion}
               >
+              {
+                /*
+                <UrlTile
+                  zIndex={1}
+                  urlTemplate="https://maps.wikimedia.org/osm-intl/${z}/${x}/${y}.png"
+                />
+                */
+              }
+
                 <UserMarker
                   location={userLocation}
                 />

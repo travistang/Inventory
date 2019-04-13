@@ -66,7 +66,7 @@ export default function({
               <TextInput
                 label="Initial Amount"
                 name="amount"
-                icon="weight"
+                icon="bank"
                 iconColor={secondary}
                 keyboardType="decimal-pad"
                 errors={errors}

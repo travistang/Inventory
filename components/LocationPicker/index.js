@@ -11,7 +11,7 @@ import {
   Button,
   Icon
 } from '../../components'
-import TextInput from '../TextInput'
+import { Fumi } from 'react-native-textinput-effects'
 
 import { colors, shadow } from '../../theme'
 const {
@@ -36,7 +36,13 @@ import PropTypes from 'prop-types'
 */
 export default class LocationPicker extends React.Component {
   static propTypes = {
-    ...TextInput.propTypes,
+    location: PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      location: PropTypes.shape({
+        latitude: PropTypes.number.isRequired,
+        longitude: PropTypes.number.isRequired,
+      }).isRequired
+    }),
     onLocationChosen: PropTypes.func.isRequired
   }
 
@@ -71,8 +77,8 @@ export default class LocationPicker extends React.Component {
           title: 'Location Permission',
           message: 'Location service required to record transaction location',
           buttonNegative: 'Cancel',
-          buttonPositive: 'OK',
-        },
+          buttonPositive: 'OK'
+        }
       )
       return granted === PermissionsAndroid.RESULTS.GRANTED
     } catch (err) {
@@ -107,12 +113,8 @@ export default class LocationPicker extends React.Component {
   }
 
   onLocationChosen(formValue) {
-    const { setFieldValue, name: fieldName } = this.props
-    alert(
-      `selecting location,
-        ${JSON.stringify({region, name, shouldSaveLocation})}
-      `)
-    //setFieldValue(fieldName, formValue)
+    const { onLocationChosen } = this.props
+    onLocationChosen(formValue)
     this.hideOverlay()
   }
 
@@ -129,6 +131,7 @@ export default class LocationPicker extends React.Component {
   }
 
   render() {
+    const { location: {name: locationName} } = this.props
     const {
       locationFormValue,
       userLocation,
@@ -145,10 +148,12 @@ export default class LocationPicker extends React.Component {
         <TouchableOpacity
           style={{width: '100%'}}
           onPress={this.openOverlay.bind(this)}>
-          <TextInput
-            name="name"
-            values={locationFormValue}
-            {...this.props}
+          <Fumi
+            label="Location"
+            iconName="map-pin"
+            iconClass={Icon}
+            iconColor={primary}
+            value={locationName}
             editable={false}
           />
         </TouchableOpacity>

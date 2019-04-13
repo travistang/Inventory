@@ -33,17 +33,11 @@ export default class ConsumeForm extends React.Component {
 
     }
     this.itemInputRef = React.createRef()
-  }
-  consume({values, resetForm}) {
-    this.props.onConsume(values).then(() => {
-      // reset everything
-      resetForm({})
-      this.itemInputRef.current.clearItems()
-
-    })
-  }
-  validationSchema() {
-    return Yup.object().shape({
+    this.initialValues = {
+      name: "",
+      items: []
+    }
+    this.validationSchema = Yup.object().shape({
       name: Yup.string().required(),
       items: Yup.array().required().of(
         Yup.object().shape({
@@ -52,12 +46,21 @@ export default class ConsumeForm extends React.Component {
         })
       )
     })
-   }
+  }
+  consume({values, resetForm}) {
+    this.props.onConsume(values).then(() => {
+      // reset everything
+      resetForm({})
+      this.itemInputRef.current.clearItems()
+    })
+  }
+
   render() {
     return (
       <Formik
         enableReinitialize
-        validationSchema={this.validationSchema()}
+        initialValues={this.initialValues}
+        validationSchema={this.validationSchema}
       >
       {
         ({
@@ -78,7 +81,6 @@ export default class ConsumeForm extends React.Component {
                 />
               </Card>
 
-
               <View style={{margin: 16}}>
                 <ItemsInput
                   ref={this.itemInputRef}
@@ -92,7 +94,7 @@ export default class ConsumeForm extends React.Component {
               <Button
                 type="block"
                 color={primary}
-                disbled={!_.isEmpty(errors)}
+                disabled={!_.isEmpty(errors) || !dirty}
                 onPress={this.consume.bind(this, {values, resetForm})}
                 title="Consume"
               />

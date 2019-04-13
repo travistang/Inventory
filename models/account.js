@@ -27,24 +27,45 @@ class Account {
         .required('Currency required')
     })
   }
+  async fetchExchangeRate() {
+    try {
+      const {
+        data: { base = null, rates = {} }
+      } = await axios.get('https://api.exchangeratesapi.io/latest')
+
+      this.recognizedCurrency = [base]
+        .concat(Object.keys(rates))
+        .sort()
+      // store the exchange rate
+      this.exchangeRate = {
+        ...rates,
+        [base]: 1.0
+      }
+      return // no need to use the next method
+    } catch(err) { }
+
+    try {
+      const {
+        data: { base, rates }
+      } = await axios.get('https://api.exchangerate-api.com/v4/latest/EUR')
+
+      this.recognizedCurrency = [base]
+        .concat(Object.keys(rates))
+        .sort()
+      this.exchangeRate = {
+        ...rates,
+        [base]: 1.0
+      }
+    } catch(err) { }
+
+  }
   constructor(DB) {
     this.DB = DB
     this.recognizedCurrency = []
     this.exchangeRate = {}
     // obtain list of currencies
-    axios.get('https://api.exchangeratesapi.io/latest')
-      .then(({ data }) => {
-        const { base = null, rates = {} } = data
-
-        this.recognizedCurrency = [base]
-          .concat(Object.keys(rates))
-          .sort()
-        // store the exchange rate
-        this.exchangeRate = {
-          ...rates,
-          [base]: 1.0
-        }
-      })
+    Promise.resolve()
+      .then(this.fetchExchangeRate.bind(this))
   }
 
   // TODO: account filtering function here

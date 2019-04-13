@@ -12,14 +12,14 @@ import {
   Button
 } from 'react-native-elements'
 import Icon from 'react-native-vector-icons/dist/FontAwesome'
-import ItemCard from '../../components/ItemCard'
-import ItemModel from '../../models/items'
-import CenterNotice from '../../components/CenterNotice'
-import Background from '../../components/Background'
-import HeaderComponent from '../../components/HeaderComponent'
 import {
-  CommonHeaderStyle
-} from '../../utils'
+  ItemCard,
+  CenterNotice,
+  Background,
+  HeaderComponent
+} from 'components'
+import ItemModel from 'models/items'
+import { CommonHeaderStyle } from 'utils'
 
 export default class ItemPage extends React.Component {
   static navigationOptions = ({navigation}) => {
@@ -51,7 +51,7 @@ export default class ItemPage extends React.Component {
 
     // reload the list whenever it has been focused
     this.props.navigation.addListener('didFocus',
-     this.loadItemsList.bind(this))
+      this.loadItemsList.bind(this))
   }
   async loadItemsList() {
     const items = await ItemModel.getItems()
@@ -77,7 +77,10 @@ export default class ItemPage extends React.Component {
           <View style={style.innerContainer}>
             {
               items.map(item => (
-                <ItemCard key={item.name} item={item} />
+                <ItemCard
+                  key={item.name}
+                  onPress={this.toItemPage.bind(this,item)}
+                  item={item} />
               ))
             }
           </View>

@@ -24,14 +24,12 @@ import {
   DropdownInput,
   Background,
   LocationPicker
-} from '../components'
+} from 'components'
 
-import {
-  LocationSchema, LocationInitialValues,
-  ItemSchema
-} from 'models/schema'
+import { Location as LocationModel } from "models/location"
+import ItemModel from 'models/items'
 
-import AccountModel from '../models/account'
+import AccountModel from 'models/account'
 import { NavigationEvents } from "react-navigation"
 
 import { colors } from '../theme'
@@ -61,7 +59,10 @@ export default class BuyForm extends React.Component {
       fromAccount: (account && account._id ) ||
         (accountList.length && accountList[0]._id) || null,
       name: "",
-      location: LocationInitialValues,
+      location: {
+        ...LocationModel.initialLocationValues,
+        shouldSaveLocation: false,
+      },
       date: new Date(),
       items: []
     }
@@ -69,9 +70,9 @@ export default class BuyForm extends React.Component {
   validationSchema() {
     return Yup.object().shape({
       items: Yup.array().required().of(
-        ItemSchema
+        ItemModel.validationSchema()
       ),
-      location: LocationSchema,
+      location: LocationModel.validationSchema,
       name: Yup.string().required(),
       date: Yup.date().required(),
       fromAccount: Yup.string().required()
@@ -92,6 +93,12 @@ export default class BuyForm extends React.Component {
       () => this.itemInputRef.current.clearItems()
     )
   }
+
+  onLocationChosen(setFieldValue, formValue) {
+    // in either case, the name should be saved
+    setFieldValue("location", formValue)
+  }
+
   render() {
     const { accounts } = this.state
     const { account: presetAccount } = this.props
@@ -115,7 +122,7 @@ export default class BuyForm extends React.Component {
               setFieldValue('fromAccount', accounts[0]._id)
             }
           }
-          const totalCost = values['items'].reduce((sum, item) => sum + item.cost, 0.0)
+          const totalCost = (values['items'] || []).reduce((sum, item) => sum + item.cost, 0.0)
 
           return (
             <View style={style.container}>
@@ -159,13 +166,10 @@ export default class BuyForm extends React.Component {
                   />
                   <LocationPicker
                     label="Location"
-                    name="location"
-                    errors={errors}
-                    values={values}
+                    location={values.location}
                     iconName="map"
-                    setFieldValue={setFieldValue}
                     name="location"
-
+                    onLocationChosen={this.onLocationChosen.bind(this, setFieldValue)}
                   />
                 </Card>
 

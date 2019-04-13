@@ -60,14 +60,14 @@ export default class ExportRecordOverlay extends React.Component {
         {
           ({values, errors, dirty, setFieldValue}) => (
             <View style={style.container}>
-                <TextInput
-                  label="server address"
-                  iconName="database"
-                  values={values}
-                  errors={errors}
-                  setFieldValue={setFieldValue}
-                  name="server"
-                />
+              <TextInput
+                label="server address"
+                iconName="database"
+                values={values}
+                errors={errors}
+                setFieldValue={setFieldValue}
+                name="server"
+              />
 
               <Button
                 title="Export"

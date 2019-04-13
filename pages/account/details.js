@@ -5,8 +5,9 @@ import {
 } from 'react-native-elements'
 import {
   CommonHeaderStyle,
-  addOpacity
-} from '../../utils'
+  addOpacity,
+  FormatCurrency
+} from 'utils'
 import {
   HeaderComponent,
   Background,
@@ -14,7 +15,7 @@ import {
   AccountTrendLine,
   CenterNotice,
   ContentCard
-} from '../../components'
+} from 'components'
 
 import {
   ScrollView,
@@ -26,13 +27,12 @@ import {
 import * as _ from 'lodash'
 import PropTypes from 'prop-types'
 import AccountCard from './AccountCard'
-import AccountModel from '../../models/account'
-import TransactionModel from '../../models/transaction'
+import AccountModel from 'models/account'
+import TransactionModel from 'models/transaction'
 import Icon from 'react-native-vector-icons/dist/FontAwesome'
-import { FormatCurrency } from '../../utils'
 import DetailsHeader from './detailsHeader'
-import { Transactions } from '../../models/transaction'
-import { colors, shadow } from '../../theme'
+import { Transactions } from 'models/transaction'
+import { colors, shadow } from 'theme'
 import { ContributionGraph } from 'react-native-chart-kit'
 
 import moment from 'moment'

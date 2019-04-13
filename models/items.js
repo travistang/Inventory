@@ -2,12 +2,20 @@ import { DB } from './'
 
 import * as Yup from 'yup'
 import * as Qty from 'js-quantities'
+import PropTypes from 'prop-types'
+import { Transactions } from './transaction'
 import { recognizedUnits } from '../constants'
-class Item {
+export class Item {
   static get type() {
     return "ITEM"
   }
-
+  static get propTypes() {
+    return PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      amount: PropTypes.number.isRequired,
+      unit: PropTypes.string.isRequired,
+    })
+  }
   static get initialItemValues() {
     return {
       name: '',
@@ -69,6 +77,28 @@ class Item {
     return await this.DB.findOneAsync({
       name: { $regex: new RegExp(`${name}`, 'i')},
       type: Item.type,
+    })
+  }
+  /*
+    get transactions involving the given items,
+    sorted from closest dates to earliest
+  */
+  async getTransactionsOfItems({ name }, numItems = null) {
+    let query = this.DB.find({
+      type: Transactions.type,
+      items: {
+        // if in this transaction, one of the items has the same name with the given item
+        $elemMatch: { name }
+      }
+    }).sort({ date: -1 })
+    if(numItems) {
+      query = query.limit(numItems)
+    }
+    return await new Promise((resolve, reject) => {
+      query.exec((err, docs) => {
+        if(err) reject(err)
+        else resolve(docs)
+      })
     })
   }
 }

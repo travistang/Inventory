@@ -44,7 +44,7 @@ export default class BuyPage extends React.Component {
       account: this.props.navigation.getParam('account')
     })
   }
-  async onBuy({ name, date, items, fromAccount}) {
+  async onBuy({ name, date, items, location, fromAccount}) {
     try {
       const buyResult = await TransactionModel.buy({
         fromAccount,

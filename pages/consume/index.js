@@ -33,7 +33,7 @@ export default class ConsumePage extends React.Component {
       <Background>
         <View style={{margin: 16}}>
           <ConsumeForm
-            onConsume={(form) => this.onConsume(form)}
+            onConsume={this.onConsume.bind(this)}
           />
         </View>
       </Background>

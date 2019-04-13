@@ -30,7 +30,7 @@ import moment from 'moment'
 
 import {
   CommonHeaderStyle
-} from '../../utils'
+} from 'utils'
 
 class TransactionPage extends React.Component {
   static navigationOptions = ({navigation}) => {

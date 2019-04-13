@@ -19,11 +19,13 @@ const style = StyleSheet.create({
 })
 export default function({
   children,
-  style: customStyle
+  style: customStyle,
+  ...props
 }) {
   return (
     <View
       style={{...style.container, ...customStyle}}
+      {...props}
     >
       {children}
     </View>

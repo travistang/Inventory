@@ -57,13 +57,14 @@
   "babel": {
     "plugins": [[
       "module-resolver", {
-	  "root": ["."],
-	  "alias": {
-	  	"utils": "./utils.js",
-		  "theme": "./theme.js",
-      "components": "./components",
-      "models": "./models"
-	  }
+    	  "root": ["."],
+    	  "alias": {
+    	  	"utils": "./utils.js",
+    		  "theme": "./theme.js",
+          "components": "./components",
+          "pages": "./pages",
+          "models": "./models"
+    	  }
       }]
    ]
  }
