@@ -41,6 +41,24 @@ export class Item {
   constructor(DB) {
     this.DB = DB
   }
+  // add multiple items at the same time.
+  // this function assures all items exists before adding.
+  // so they are either added together or none will be added at all.
+  async addItems(items) {
+    const originalItems = await Promise.all(
+      items.map(this.getItemByName.bind(this))
+    )
+    // if some of the items do not exist, drop them.
+    if(originalItems.some(item => !item)) {
+      return null
+    } else {
+      const addingResult = await Promise.all(
+        items.map(this.add.bind(this))
+      )
+      return addingResult
+    }
+  }
+
   // analogy to "addIncome" in account method
   async add({
     name,
@@ -56,6 +74,7 @@ export class Item {
     }, { $set: {amount: newAmount}})
     return { ...item, amount: newAmount}
   }
+
   async createItem({
     name,
     amount, unit
@@ -72,6 +91,7 @@ export class Item {
   async getItems() {
     return await this.DB.findAsync({ type: Item.type })
   }
+
   // perform case insensitive search
   async getItemByName(name) {
     return await this.DB.findOneAsync({
@@ -101,5 +121,6 @@ export class Item {
       })
     })
   }
+
 }
 export default new Item(DB)

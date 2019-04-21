@@ -7,6 +7,7 @@ import {
   TextInput
 } from 'components'
 import * as Yup from 'yup'
+import NearbyLocationList from './MapViewOverlay/NearbyLocationList'
 import CoordinateComponent from './CoordinateComponent'
 import ReverseGeocodingComponent from './ReverseGeocodingComponent'
 import {colors, shadow} from 'theme'
@@ -31,11 +32,11 @@ const validationSchema = Yup.object().shape({
   saveLocation: Yup.bool()
 })
 export default function({
-  latitude, longitude,
+  locationsNearby,
   reversedGeoencodingName,
   name,
+  isLocating,
   isMapCentered,
-  isMapInitialised,
   height,
   onCenter = () => {},
   onNameChanged = () => {},
@@ -49,8 +50,8 @@ export default function({
       <ReverseGeocodingComponent
         height={height}
         name={reversedGeoencodingName}
+        isLocating={isLocating}
         isMapCentered={isMapCentered}
-        isMapInitialised={isMapInitialised}
         onCenter={onCenter}
       />
       <TextInput
@@ -60,7 +61,6 @@ export default function({
         values={{ name }}
         onChangeText={onNameChanged}
       />
-
     </View>
   )
 }

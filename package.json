@@ -63,7 +63,8 @@
     		  "theme": "./theme.js",
           "components": "./components",
           "pages": "./pages",
-          "models": "./models"
+          "models": "./models",
+          "LocationPicker": "./components/LocationPicker"
     	  }
       }]
    ]

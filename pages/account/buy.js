@@ -48,6 +48,7 @@ export default class BuyPage extends React.Component {
     try {
       const buyResult = await TransactionModel.buy({
         fromAccount,
+        location,
         items, name, date
       })
 

@@ -1,6 +1,4 @@
 import React from 'react'
-import TextInput from '../components/TextInput'
-import TransactionModel from '../models/transaction'
 
 import * as _ from 'lodash'
 import * as Yup from 'yup'
@@ -10,16 +8,22 @@ import {
  View,
  Picker,
  StyleSheet,
- Text
+ Text,
+ Button
 } from 'react-native'
-import {
-  Button
-} from 'react-native-elements'
 
-import AccountCard from '../components/AccountCard'
-import DropdownInput from '../components/DropdownInput'
-import Card from '../components/Card'
-import { colors } from '../theme'
+import {
+  TextInput,
+  AccountCard,
+  DropdownInput,
+  LocationPicker,
+  Background,
+  Card
+} from 'components'
+import { Location as LocationModel } from "models/location"
+
+import { colors } from 'theme'
+
 const {
   secondary, white, textPrimary, primary
 } = colors
@@ -27,7 +31,12 @@ const {
 const initialValues = {
   name: "",
   obtainedAmount: 0,
-  to: ""
+  to: "",
+  location: {
+    ...LocationModel.initialLocationValues,
+    shouldSaveLocation: false,
+    isLocationRegistered: false,
+  },
 }
 
 const style = StyleSheet.create({
@@ -47,6 +56,7 @@ const style = StyleSheet.create({
 const validationSchema = Yup.object().shape({
   obtainedAmount: Yup.number()
     .required(),
+  location: LocationModel.validationSchema,
   to: Yup.string().required(),
   name: Yup.string()
     .min(8, "Item name is too short")
@@ -87,7 +97,7 @@ export default function({
         isSubmitting
       }) => {
         return (
-          <View style={finalStyle.container}>
+          <Background style={finalStyle.container}>
             <AccountCard
               isInput={true}
               amountChange={isIncome?(values.obtainedAmount):(-values.obtainedAmount)}
@@ -128,6 +138,10 @@ export default function({
                 inputStyle={{color: textPrimary }}
                 returnKeyType="next"
               />
+              <LocationPicker
+                location={values.location}
+                onLocationChosen={loc => setFieldValue("location", loc)}
+              />
             </Card>
 
             <Button
@@ -142,7 +156,7 @@ export default function({
                 || isSubmitting
               }
             />
-          </View>
+        </Background>
         )
       }
     }

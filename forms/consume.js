@@ -2,7 +2,6 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import {
   Formik,
-
 } from 'formik'
 
 import {
@@ -10,16 +9,18 @@ import {
 } from 'react-native'
 
 import {
-  Button
-} from '../components'
+  Button,
+  ItemsInput, TextInput, Card,
+  LocationPicker
+} from 'components'
+
+import { Location as LocationModel } from "models/location"
 
 import * as Yup from 'yup'
 import * as _ from 'lodash'
-import {
-  ItemsInput, TextInput, Card
-} from '../components'
 
-import { colors } from '../theme'
+
+import { colors } from 'theme'
 const { white, secondary, primary } = colors
 
 export default class ConsumeForm extends React.Component {
@@ -35,10 +36,15 @@ export default class ConsumeForm extends React.Component {
     this.itemInputRef = React.createRef()
     this.initialValues = {
       name: "",
+      location: {
+        ...LocationModel.initialLocationValues,
+        shouldSaveLocation: false,
+      },
       items: []
     }
     this.validationSchema = Yup.object().shape({
       name: Yup.string().required(),
+      location: LocationModel.validationSchema,
       items: Yup.array().required().of(
         Yup.object().shape({
           name: Yup.string().required(),
@@ -78,6 +84,10 @@ export default class ConsumeForm extends React.Component {
                   errors={errors}
                   values={values}
                   setFieldValue={setFieldValue}
+                />
+                <LocationPicker
+                  location={values.location}
+                  onLocationChosen={(v) => setFieldValue('location', v)}
                 />
               </Card>
 

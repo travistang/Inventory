@@ -5,16 +5,14 @@ import {
   Text,
   TouchableOpacity
 } from 'react-native'
-// import {
-//   Text
-// } from 'react-native-elements'
-import { colors, colorForType } from '../../theme'
-import { TransactionPropTypes, FormatCurrency } from '../../utils'
-import { Transactions } from '../../models/transaction'
-import AccountModel from '../../models/account'
+import { colors } from 'theme'
+import { TransactionPropTypes, FormatCurrency } from 'utils'
+import { Transactions } from 'models/transaction'
+import AccountModel from 'models/account'
 import { withNavigation } from 'react-navigation'
 import moment from 'moment'
 import Icon from 'react-native-vector-icons/dist/FontAwesome'
+
 class DetailsHeaderSection extends React.Component {
   static propTypes = {
     transaction: TransactionPropTypes,
@@ -56,7 +54,7 @@ class DetailsHeaderSection extends React.Component {
       case INCOME:
         return (
           <Text>
-              {FormatCurrency(obtainedAmount, fromAccount.currency)}
+              {FormatCurrency(obtainedAmount, (fromAccount || toAccount).currency)}
           </Text>
         )
       case TRANSFER:
@@ -149,7 +147,7 @@ class DetailsHeaderSection extends React.Component {
     return (
       <View style={{
           ...style.container,
-          backgroundColor: colorForType(type)}}>
+          backgroundColor: Transactions.colorForType(type)}}>
         <View style={style.centerRow}>
           <Text style={style.quantityDescription}>
             {this.getQuantityDescription()}

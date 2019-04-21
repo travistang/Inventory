@@ -32,8 +32,8 @@ import ItemModel from 'models/items'
 import AccountModel from 'models/account'
 import { NavigationEvents } from "react-navigation"
 
-import { colors } from '../theme'
-const { background, white, primary, secondary } = colors
+import { colors } from 'theme'
+const { white, primary, secondary } = colors
 /*
   Component that represents the form of buying stuff
 */
@@ -220,7 +220,7 @@ export default class BuyForm extends React.Component {
   buy({values, resetForm}) {
     // reset the form after it is bought
     this.props.onBuy(values)
-      .then(() => resetForm({}))
+      .then(() => resetForm(this.initialValues()))
       .then(() => this.clearItems())
 
   }

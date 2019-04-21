@@ -4,8 +4,8 @@ import {
 } from 'react-native'
 import {
   Icon
-} from '../'
-import { colors } from '../../theme'
+} from 'components'
+import { colors } from 'theme'
 const { primary, secondary, textSecondary, white} = colors
 const style = StyleSheet.create({
   container: {
@@ -30,7 +30,8 @@ const style = StyleSheet.create({
 
 export default function({
   name,
-  isMapCentered, isMapInitialised,
+  isMapCentered,
+  isLocating,
   onCenter,
   height
 }) {
@@ -40,8 +41,9 @@ export default function({
     opacity: name?1:0.5,
     color: name?primary:textSecondary
   }
+  const hasError = !isLocating && !name
   // special treatment for initialised component
-  if(!isMapInitialised) {
+  if(isLocating) {
     inferredNameStyle = {
       opacity: 1,
       color: white,

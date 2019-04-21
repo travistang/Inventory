@@ -3,6 +3,7 @@ import * as Yup from 'yup'
 import AccountModel from './account'
 import ItemModel from './items'
 import LocationModel from './location'
+import { colors } from 'theme'
 
 import moment from 'moment'
 import * as _ from 'lodash'
@@ -37,7 +38,28 @@ export class Transactions {
       SPEND: "SPEND" // Money -> ()
     }
   }
-
+  static colorForType = (type) => {
+    const {
+      BUY, TRANSFER, CRAFT,
+      SELL, INCOME, CONSUME, SPEND
+    } = Transactions.TransactionTypes
+    const {
+      textPrimary, textSecondary,
+      primary, secondary, danger, info, white, background
+    } = colors
+    switch(type) {
+      case BUY:
+      case SPEND:
+        return primary
+      case TRANSFER:
+        return info
+      case INCOME:
+      case CONSUME:
+        return secondary
+      default:
+        return textSecondary
+    }
+  }
   // types that involve only items, therefore no money is involved
   static get ItemOnlyTypes() {
     const { CONSUME, CRAFT } = Transactions.TransactionTypes
@@ -133,13 +155,7 @@ export class Transactions {
       ),
       // name can be added additionally or found by reverse geoencoding.
       // coordinates should be discovered by the devices or selected by user
-      location: Yup.object().shape({
-        coordinate: Yup.object().shape({
-          lat: Yup.number().required(),
-          lng: Yup.number().required()
-        }).required(),
-        name: Yup.string(),
-      }),
+      location: Yup.string(),
       date: Yup.date().required().min(new Date()),
       items: Yup.array().of(
         Yup.object().shape({
@@ -256,14 +272,14 @@ export class Transactions {
     return results
   }
   async spend({
-    name,
-    accountId,
-    amount
+    amount,
+    ...props
   }) {
-    return await this.income({name, accountId, amount: -amount})
+    return await this.income({...props, amount: -amount})
   }
   async consume({
     name,
+    location,
     items
   }) {
     // for each item, record the consumption
@@ -273,7 +289,7 @@ export class Transactions {
         ({...item, amount: -item.amount})
       ).map( async (item, i) => {
         const result = await ItemModel.add(item)
-        if(!result) return 
+        if(!result) return
         return ({
           ...item,
           // because it is turned to negative, so turn it back to positive again
@@ -286,13 +302,14 @@ export class Transactions {
     const { CONSUME } = Transactions.TransactionTypes
     // then add the transaction record
     return await this.addTransactionRecord({
-      name, items,
+      name, items, location,
       transactionType: CONSUME
     })
   }
 
   async income({
     name,
+    location,
     accountId,
     amount,
   }) {
@@ -306,6 +323,7 @@ export class Transactions {
     const isIncome = amount > 0
     return await this.addTransactionRecord({
       name,
+      location,
       from: isIncome?null:accountId,
       to: isIncome?accountId:null,
       obtainedAmount: isIncome?amount:0,
@@ -369,27 +387,24 @@ export class Transactions {
     date = new Date(),
     consumedAmount = 0,
     obtainedAmount = 0,
+    location = { },
     from = null, to = null,
     exchangeRate = null,
     items = [],
     transactionType = Transactions.TransactionTypes.BUY}) {
-    const { CONSUME, CRAFT } = Transactions.TransactionTypes
-    const itemsOnly = [CONSUME, CRAFT].indexOf(transactionType) > -1
 
-    // at least one of the "from" and "to" is there
-    // except when this transaction involves items only
-    if(!from && !to && !itemsOnly) return null
-    if(!consumedAmount && !obtainedAmount && !itemsOnly) return null
-
-    return await this.DB.insertAsync({
-      name,
-      consumedAmount, obtainedAmount,
-      date,
-      from, to,
-      transactionType,
-      items,
-      type: Transactions.type
-    })
+    return await LocationModel
+      .recordLocation(location)
+      .then(locationId => this.DB.insertAsync({
+        name,
+        consumedAmount, obtainedAmount,
+        date,
+        location: locationId,
+        from, to,
+        transactionType,
+        items,
+        type: Transactions.type
+      }))
   }
   // get recent transactions from the database, sorted from newest to oldest.
   // this returns the `pages * numRecords`-th to `(pages + 1 ) * numRecords`-th transactions
@@ -471,24 +486,26 @@ export class Transactions {
       amount: -totalExpenditure
     })
 
-    // add all items
-    let canAddSuccessfully = true
+    const addItemsResult = await ItemModel.addItems(items)
+    if(!addItemsResult) {
+      return
+    } else {
+      return await this.addTransactionRecord({
+        name,
+        date,
+        location,
+        consumedAmount: totalExpenditure,
+        from: fromAccount,
+        transactionType: Transactions.TransactionTypes.BUY,
+        items
+      })
+    }
+    // items.forEach(async function(itemChange, i) {
+    //   let result = await ItemModel.add(itemChange)
+    //   if(!result)
+    //   this[i].unit = result.unit
+    // })
 
-    items.forEach(async function(itemChange, i) {
-      let result = await ItemModel.add(itemChange)
-      alert(`buy: ${JSON.stringify(this)}`)
-      this[i].originalAmount = result.amount - itemChange.amount
-      this[i].unit = result.unit
-    })
-
-    return await this.addTransactionRecord({
-      name,
-      date,
-      consumedAmount: totalExpenditure,
-      from: fromAccount,
-      transactionType: Transactions.TransactionTypes.BUY,
-      items
-    })
   }
 }
 

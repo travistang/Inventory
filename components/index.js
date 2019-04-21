@@ -19,5 +19,6 @@ export TransactionList from './TransactionList'
 export SpendIncomeBanner from './SpendIncomeBanner'
 export LocationPicker from './LocationPicker'
 export Meter from './Meter'
+export LocationPreviewCard from './LocationPreviewCard'
 
 export Icon from 'react-native-vector-icons/dist/FontAwesome'

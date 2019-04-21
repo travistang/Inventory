@@ -52,12 +52,13 @@ export default class AddIncomePage extends React.Component {
     const {
       name,
       to: accountId,
-      obtainedAmount: amount
+      obtainedAmount: amount,
+      location,
     } = form
     const isIncome = this.props.navigation.getParam('income')
     const finalAmount = isIncome?amount:-amount
     const result = await TransactionModel.income({
-      name, accountId, amount: finalAmount
+      name, accountId, amount: finalAmount, location
     })
     let message = result?
       "Change saved":

@@ -2,7 +2,7 @@ import React from 'react'
 import {
   ScrollView, StyleSheet
 } from 'react-native'
-import { colors } from '../theme'
+import { colors } from 'theme'
 const { background } = colors
 const style = StyleSheet.create({
   container: {

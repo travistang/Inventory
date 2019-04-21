@@ -7,13 +7,15 @@ import {
   Platform,
   Text,
 } from 'react-native'
+
 import {
   Button,
   Icon
-} from '../../components'
+} from 'components'
+
 import { Fumi } from 'react-native-textinput-effects'
 
-import { colors, shadow } from '../../theme'
+import { colors, shadow } from 'theme'
 const {
   white, primary, secondary,
   textSecondary
@@ -23,6 +25,13 @@ import MapViewOverlay from './MapViewOverlay'
 import Geolocation from 'react-native-geolocation-service'
 
 import PropTypes from 'prop-types'
+
+export LocationForm from './LocationForm'
+export ReverseGeocodingComponent from './ReverseGeocodingComponent'
+export CoordinateComponent from './CoordinateComponent'
+export UserMarker from './UserMarker'
+export SelectionMarker from './SelectionMarker'
+export LocationMarker from './LocationMarker'
 
 /*
   A component that returns a "location" with the following format:
@@ -108,13 +117,24 @@ export default class LocationPicker extends React.Component {
     await this.subscribeUserLocation()
   }
 
+  getCurrentUserLocation() {
+    return new Promise((resolve, reject) => {
+      Geolocation.getCurrentPosition(
+        resolve, reject, {
+        enableHighAccuracy: true,
+      })
+    })
+  }
+
   async openOverlay() {
-    this.setState({ isOverlayOpen: true })
+    this.setState({ isOverlayOpen: true }, async () => {
+      const {coords: userLocation } = await this.getCurrentUserLocation()
+      this.setState({ userLocation })
+    })
   }
 
   onLocationChosen(formValue) {
-    const { onLocationChosen } = this.props
-    onLocationChosen(formValue)
+    this.props.onLocationChosen(formValue)
     this.hideOverlay()
   }
 

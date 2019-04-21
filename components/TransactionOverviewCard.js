@@ -7,7 +7,7 @@ import Card from './Card'
 import {
   View, StyleSheet
 } from 'react-native'
-import { colors, colorForType } from '../theme'
+import { colors } from 'theme'
 import {
   Badge, Text
 } from 'react-native-elements'
@@ -134,7 +134,7 @@ export default class TransactionCard extends React.Component {
         }}>
           <Text style={{
               ...style.typeBadge,
-              backgroundColor: colorForType(type),
+              backgroundColor: Transactions.colorForType(type),
               color: white
           }}>
               {type}

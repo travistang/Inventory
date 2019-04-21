@@ -9,25 +9,27 @@ import {
   TransactionPropTypes,
   CommonHeaderStyle,
   FormatItemAmount
-} from '../../utils'
+} from 'utils'
 import {
   HeaderComponent,
   ItemCard,
   Background,
   ContentCard,
   AccountCard,
-} from '../../components'
+  LocationPreviewCard,
+  Icon
+} from 'components'
 
-import AccountModel from '../../models/account'
+import AccountModel from 'models/account'
 import {
   Transactions,
   Transaction as TransactionModel
-} from '../../models/transaction'
+} from 'models/transaction'
 // import TransactionModel from '../../models/transaction'
-import ItemModel from '../../models/items'
+import ItemModel from 'models/items'
 import { withNavigation } from 'react-navigation'
-import { colors , colorForType } from '../../theme'
-import Icon from 'react-native-vector-icons/dist/FontAwesome'
+import { colors } from 'theme'
+
 
 const {
   CONSUME, SELL, BUY, SPEND
@@ -43,7 +45,7 @@ class TransactionDetailsPage extends React.Component {
       headerTintColor: white,
       headerStyle: {
         ...CommonHeaderStyle,
-        backgroundColor: colorForType(transaction.transactionType)
+        backgroundColor: Transactions.colorForType(transaction.transactionType)
       },
     }
   }
@@ -53,16 +55,7 @@ class TransactionDetailsPage extends React.Component {
       transaction: null
     }
   }
-  getSubSectionComponent({
-    title, icon
-  }) {
-    return (
-      <View style={style.subSectionHeader}>
-        { icon && (<Icon name={icon} size={26} />) }
-        <Text style={style.subSectionHeaderText}>{title}</Text>
-      </View>
-    )
-  }
+
   getMainContent(transaction) {
     const { name, items, transactionType} = transaction
     const { fromAccount, toAccount } = this.state.transaction
@@ -70,7 +63,10 @@ class TransactionDetailsPage extends React.Component {
       case BUY:
       case CONSUME:
         return (
-          <View style={style.consumeItemListContainer}>
+          <ContentCard
+            title="items"
+            icon="gift"
+            style={style.consumeItemListContainer}>
             {
               items.map((item) => (
                 <ItemCard
@@ -78,12 +74,11 @@ class TransactionDetailsPage extends React.Component {
                   key={item.name} item={item} />
               ))
             }
-          </View>
+          </ContentCard>
         )
       case SPEND:
         if(!fromAccount && !toAccount) return null
         return (
-          <View>
             <ContentCard
               style={style.fromAccountContentCard}
               title="From account"
@@ -92,7 +87,6 @@ class TransactionDetailsPage extends React.Component {
               <AccountCard account={fromAccount || toAccount }
               />
             </ContentCard>
-          </View>
         )
 
 
@@ -107,26 +101,7 @@ class TransactionDetailsPage extends React.Component {
     this.setState({ transaction })
 
   }
-  getSubTitle({ transactionType }) {
-    let subtitleParams = {
-      title: "",
-      icon: null
-    }
 
-
-    switch(transactionType) {
-      case CONSUME:
-      case SELL:
-      case BUY:
-        subtitleParams.title = "ITEMS"
-        subtitleParams.icon = "gift"
-        break
-
-      default:
-        return null
-    }
-    return this.getSubSectionComponent(subtitleParams)
-  }
   render() {
     const { transaction } = this.state
     if(!transaction) return null
@@ -135,11 +110,12 @@ class TransactionDetailsPage extends React.Component {
         <DetailsHeaderSection
           transaction={transaction}
         />
-
-        {this.getSubTitle(transaction)}
-        <View style={style.mainContainer}>
+      <View style={style.mainContainer}>
+        <LocationPreviewCard
+          location={transaction.location}
+        />
           {this.getMainContent(transaction)}
-        </View>
+      </View>
       </Background>
     )
   }

@@ -1,8 +1,7 @@
 import React from 'react'
-import { Circle } from 'react-native-maps-osmdroid'
+import { Circle, Marker } from 'react-native-maps-osmdroid'
 import {
-  View,
-  StyleSheet
+  View, Text
 } from 'react-native'
 import { colors } from 'theme'
 import { addOpacity } from 'utils'
@@ -14,12 +13,19 @@ export default function({
   // stop rendering invalid circles on map
   if(!latitude || !longitude || !accuracy)
     return null
+  const point = {latitude, longitude}
   return (
-    <Circle
-      strokeColor={primary}
-      fillColor={addOpacity(primary, 0.3)}
-      radius={accuracy}
-      center={{latitude, longitude}}
-    />
+    <View>
+      <Marker coordinate={point} pinColor={primary}>
+          <Text> You are here </Text>
+      </Marker>
+      <Circle
+        strokeColor={primary}
+        fillColor={addOpacity(primary, 0.3)}
+        radius={accuracy * 10}
+        center={point}
+      />
+
+    </View>
   )
 }
