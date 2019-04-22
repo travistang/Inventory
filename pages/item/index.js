@@ -4,13 +4,10 @@ import {
   View,
   ScrollView,
   TouchableOpacity,
-  RefreshControl
+  RefreshControl,
+  Text, Button
 } from 'react-native'
 
-import {
-  Text,
-  Button
-} from 'react-native-elements'
 import Icon from 'react-native-vector-icons/dist/FontAwesome'
 import {
   ItemCard,
@@ -21,87 +18,53 @@ import {
 import ItemModel from 'models/items'
 import { CommonHeaderStyle } from 'utils'
 
+import Component, { navigationOptions } from './component'
+
 export default class ItemPage extends React.Component {
-  static navigationOptions = ({navigation}) => {
-    const { params = {} } = navigation.state
-    return {
-      headerStyle: CommonHeaderStyle,
-      headerTitle: (
-        <HeaderComponent
-          title="items"
-          icon="gift"
-        />
-      ),
-      headerRight: (
-        <Button
-          type="clear"
-          onPress={() => navigation.push('CreateItemPage')}
-          icon={{name: 'add'}}
-        />
-      )
-    }
-  }
+  static navigationOptions = navigationOptions
   constructor(props) {
     super(props)
 
     this.state = {
       items: [],
-      refreshing: false
+      refreshing: false,
+      searchTerm: ""
     }
 
     // reload the list whenever it has been focused
     this.props.navigation.addListener('didFocus',
       this.loadItemsList.bind(this))
   }
+
   async loadItemsList() {
-    const items = await ItemModel.getItems()
-    this.setState({ items })
+    this.setState({
+      refreshing: true
+    }, async () => {
+      const items = await ItemModel.getItems()
+      this.setState({
+        items,
+        refreshing: false
+      })
+    })
   }
+
   toItemPage(item) {
     this.props.navigation.push('ItemDetailsPage', { item })
   }
   render() {
-    const { items } = this.state
+    const { items: allItems, searchTerm } = this.state
+    const finalState = {
+      ...this.state,
+      items: allItems.filter(
+        ({name}) => new RegExp(searchTerm, "i").test(name))
+    }
     return (
-      <Background
-        refreshControl={
-          <RefreshControl
-            refreshing={this.state.refreshing}
-            onRefresh={this.loadItemsList.bind(this)}
-          />
-        }
-        style={style.container}
-      >
-      {
-        (items.length)?(
-          <View style={style.innerContainer}>
-            {
-              items.map(item => (
-                <ItemCard
-                  key={item.name}
-                  onPress={this.toItemPage.bind(this,item)}
-                  item={item} />
-              ))
-            }
-          </View>
-        ):(
-          <CenterNotice
-            title="You have no items"
-            subtitle="Click on the '+' button to add one."
-          />
-        )
-      }
-
-    </Background>
+      <Component
+        {...finalState}
+        onSearchTermChanged={searchTerm => this.setState({searchTerm})}
+        onRefresh={this.loadItemsList.bind(this)}
+        onItemClick={this.toItemPage.bind(this)}
+      />
     )
   }
 }
-
-const style = StyleSheet.create({
-  innerContainer: {
-    display: 'flex',
-    flexDirection:'row',
-    flexWrap: 'wrap',
-    margin: 16
-  }
-})
