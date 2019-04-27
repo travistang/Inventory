@@ -26,7 +26,7 @@ const style = StyleSheet.create({
   }
 })
 export default function({
-  location: { location = null , name = "" }
+  location: { location = null , name = "" } = {}
 }) {
   return (
     <ContentCard
@@ -37,7 +37,6 @@ export default function({
       <View style={style.container}>
         {
           location?(
-
               <MapView
                 style={style.mapView}
                 provide={Platform.os === 'ios'?null:'osmdroid'}

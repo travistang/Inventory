@@ -22,24 +22,24 @@ import {
   ItemCard,
   Card,
   Background,
-} from '../components'
+} from 'components'
 // import Button from '../components/Button'
 // import HeaderComponent from '../components/HeaderComponent'
 // import TextInput from '../components/TextInput'
 import {
   FormatCurrency,
   FormatItemAmount
-} from '../utils'
+} from 'utils'
 
 import * as _ from 'lodash'
 import {
   quantityOptions
-} from '../models'
+} from 'models'
 
 // import CenterNotice from '../components/CenterNotice'
 import ActionChip from './ActionChip'
 
-import ItemModel from '../models/items'
+import ItemModel from 'models/items'
 // import ItemCard from '../components/ItemCard'
 // import Card from '../components/Card'
 // import Background from '../components/Background'
@@ -48,7 +48,7 @@ import Icon from 'react-native-vector-icons/dist/FontAwesome'
 import PropTypes from 'prop-types'
 import { Fumi } from 'react-native-textinput-effects'
 
-import { colors } from '../theme'
+import { colors } from 'theme'
 const {
   textSecondary,
   secondary, primary, background, white

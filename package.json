@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "start": "node node_modules/react-native/local-cli/cli.js start",
-    "test": "jest"
+    "test": "jest --verbose --coverage",
+    "test:watch": "jest --verbose --watch",
+    "coverage": "jest --verbose --coverage && open ./coverage/lcov-report/index.html"
   },
   "dependencies": {
     "aes-js": "^3.1.2",
@@ -28,6 +30,7 @@
     "react-native-globalize": "^2.3.0",
     "react-native-local-mongodb": "^2.2.9",
     "react-native-maps-osmdroid": "^0.23.0-rc2",
+    "react-native-preference": "^1.1.0",
     "react-native-responsive-linechart": "^1.5.1",
     "react-native-sparkline": "^1.0.5-beta",
     "react-native-svg": "^9.3.6",
@@ -42,12 +45,28 @@
   "devDependencies": {
     "babel-core": "^7.0.0-bridge.0",
     "babel-jest": "24.0.0",
+    "enzyme": "^3.9.0",
+    "enzyme-adapter-react-16": "^1.12.1",
+    "enzyme-react-16-adapter-setup": "^0.1.0",
     "jest": "24.0.0",
+    "jest-enzyme": "^7.0.2",
+    "jsdom": "15.0.0",
+    "jsdom-global": "3.0.2",
     "metro-react-native-babel-preset": "^0.51.1",
+    "react-dom": "^16.8.6",
     "react-test-renderer": "16.6.3"
   },
   "jest": {
-    "preset": "react-native"
+    "preset": "react-native",
+    "modulePaths": [
+      "<rootDir>/node_modules"
+    ],
+    "setupFilesAfterEnv": [
+      "<rootDir>/setupTests.js"
+    ],
+    "transformIgnorePatterns": [
+      "/node_modules/(?!react-native|native-base|react-clone-referenced-element)/.+"
+    ]
   },
   "rnpm": {
     "assets": [
@@ -55,19 +74,23 @@
     ]
   },
   "babel": {
-    "plugins": [[
-      "module-resolver", {
-    	  "root": ["."],
-    	  "alias": {
-    	  	"utils": "./utils.js",
-    		  "theme": "./theme.js",
-          "components": "./components",
-          "pages": "./pages",
-          "models": "./models",
-          "LocationPicker": "./components/LocationPicker"
-    	  }
-      }]
-   ]
- }
-
+    "plugins": [
+      [
+        "module-resolver",
+        {
+          "root": [
+            "."
+          ],
+          "alias": {
+            "utils": "./utils.js",
+            "theme": "./theme.js",
+            "components": "./components",
+            "pages": "./pages",
+            "models": "./models",
+            "LocationPicker": "./components/LocationPicker"
+          }
+        }
+      ]
+    ]
+  }
 }

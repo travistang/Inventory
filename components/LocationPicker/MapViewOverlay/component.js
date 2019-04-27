@@ -1,53 +1,52 @@
-import React from 'react'
+import React from "react";
 import {
-  View, Text,
-  StyleSheet, Platform,
-  KeyboardAvoidingView,
-} from 'react-native'
-import { Overlay } from 'react-native-elements'
-import {
-  Button
-} from 'components'
-import MapView, {Marker, UrlTile} from 'react-native-maps-osmdroid'
+  View,
+  Text,
+  StyleSheet,
+  Platform,
+  KeyboardAvoidingView
+} from "react-native";
+import { Overlay } from "react-native-elements";
+import { Button } from "components";
+import MapView, { Marker, UrlTile } from "react-native-maps-osmdroid";
 
-import { colors } from 'theme'
-const { white, primary } = colors
+import { colors } from "theme";
+const { white, primary } = colors;
 
 import {
   LocationForm,
   UserMarker,
   SelectionMarker,
-  LocationMarker,
-} from 'LocationPicker'
-
+  LocationMarker
+} from "LocationPicker";
 
 const style = StyleSheet.create({
   container: {
     padding: 16,
-    flexDirection: 'column',
+    flexDirection: "column",
     flex: 1,
     backgroundColor: white
   },
   header: {
-    marginBottom: 16,
+    marginBottom: 16
   },
   mapViewContainer: {
     height: 260,
     // marginTop: titleHeight,
-    overflow: 'hidden',
-    borderRadius: 16,
-
+    overflow: "hidden",
+    borderRadius: 16
   },
   mapView: {
-    width: '100%',
-    height: 240,
-  },
-})
-const addressComponentHeight = 72
+    width: "100%",
+    height: 240
+  }
+});
+const addressComponentHeight = 72;
 
 export default function({
   initialRegion,
-  isOpen, onClose,
+  isOpen,
+  onClose,
 
   isLocating,
   isMapCentered,
@@ -68,72 +67,61 @@ export default function({
   onMarkerPressed,
   disableButton,
 
-  locationsNearby,
-
+  locationsNearby
 }) {
   return (
-    <Overlay
-      fullScreen
-      onBackdropPress={onClose}
-      isVisible={isOpen}>
+    <Overlay fullScreen onBackdropPress={onClose} isVisible={isOpen}>
       <KeyboardAvoidingView style={style.container}>
         <Text style={style.header}>
-          {'Choose Transaction Location'.toUpperCase()}
+          {"Choose Transaction Location".toUpperCase()}
         </Text>
-          <View style={style.mapViewContainer}>
-            <MapView
-              ref={getMapReference}
-              style={style.mapView}
-              provider={Platform.os === 'ios'?null:'osmdroid'}
-              showsTraffic={false}
-              showsCompass={false}
-              loadingEnabled={true}
-              showsUserLocation={true}
-              cacheEnabled={true}
-              onRegionChange={onRegionChange}
-              onPress={onMapPressed}
-              onRegionChangeComplete={onRegionChangeComplete}
-              initialRegion={{...initialRegion, ...userLocation}}
-            >
-              <SelectionMarker
-                location={cameraLocation}
+        <View style={style.mapViewContainer}>
+          <MapView
+            ref={getMapReference}
+            style={style.mapView}
+            provider={Platform.os === "ios" ? null : "osmdroid"}
+            showsTraffic={false}
+            showsCompass={false}
+            loadingEnabled={true}
+            showsUserLocation={true}
+            cacheEnabled={true}
+            onRegionChange={onRegionChange}
+            onPress={onMapPressed}
+            onRegionChangeComplete={onRegionChangeComplete}
+            initialRegion={{ ...initialRegion, ...userLocation }}
+          >
+            <SelectionMarker location={cameraLocation} />
+            <UserMarker location={userLocation} />
+            {locationsNearby.map(({ location, name }, i) => (
+              <LocationMarker
+                onPress={() => onMarkerPressed(i)}
+                key={name}
+                name={name}
+                location={location}
               />
-              <UserMarker
-                location={userLocation}
-              />
-              {
-                locationsNearby.map(({location, name}, i) => (
-                  <LocationMarker
-                    onPress={() => onMarkerPressed(i)}
-                    key={name}
-                    name={name}
-                    location={location}
-                    />
-                ))
-              }
-            </MapView>
-          </View>
+            ))}
+          </MapView>
+        </View>
 
-          <LocationForm
-            locationsNearby={locationsNearby}
-            onCenter={onRequestCenterMapView}
-            onNameChanged={onInputNameChanged}
-            reversedGeoencodingName={reversedGeoencodingName}
-            isMapCentered={isMapCentered}
-            isLocating={isLocating}
-            name={inputName}
-            height={addressComponentHeight}
-          />
+        <LocationForm
+          locationsNearby={locationsNearby}
+          onCenter={onRequestCenterMapView}
+          onNameChanged={onInputNameChanged}
+          reversedGeoencodingName={reversedGeoencodingName}
+          isMapCentered={isMapCentered}
+          isLocating={isLocating}
+          name={inputName}
+          height={addressComponentHeight}
+        />
 
-          <Button
-            disabled={disableButton}
-            onPress={onSubmitButtonPressed}
-            title="Submit"
-            type="block"
-            color={primary}
-          />
+        <Button
+          disabled={disableButton}
+          onPress={onSubmitButtonPressed}
+          title="Submit"
+          type="block"
+          color={primary}
+        />
       </KeyboardAvoidingView>
-
     </Overlay>
-  )
+  );
 }

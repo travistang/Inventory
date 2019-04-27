@@ -7,7 +7,7 @@ import Icon from 'react-native-vector-icons/dist/FontAwesome'
 
 const style = StyleSheet.create({
   text: {
-    fontSize: 26,
+    fontSize: 22,
     // fontWeight: 'bold'
   }
 })

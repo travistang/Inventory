@@ -17,9 +17,14 @@ export default class LocationPreviewCardContainer extends React.Component {
   async componentDidMount() {
     const { location: id } = this.props
     if(!id) return
-    
+
     const location = await LocationModel.getLocationById(id)
-    this.setState({ location: location })
+    try {
+      const result = LocationModel.validationSchema.validate(result)
+      this.setState({ location: location })
+    } catch(err) {
+      // do nothing
+    }
   }
   render() {
     return (
