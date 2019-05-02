@@ -1,7 +1,13 @@
 import React from "react"
 import { CommonHeaderStyle } from "utils"
 import { colors } from "theme"
-import { CenterNotice, Button, Background, ContentCard } from "components"
+import {
+  CenterNotice,
+  Button,
+  Background,
+  ContentCard,
+  HeaderComponent
+} from "components"
 import { Text, View } from "react-native"
 import PropTypes from "prop-types"
 const { primary, secondary } = colors
