@@ -47,7 +47,19 @@
     "react-test-renderer": "16.6.3"
   },
   "jest": {
-    "preset": "react-native"
+    "preset": "react-native",
+    "modulePaths": [
+      "<rootDir>/node_modules"
+    ],
+    "setupFilesAfterEnv": [
+      "<rootDir>/setupTests.js"
+    ],
+    "transform": {
+      "^.+\\.js$": "<rootDir>/node_modules/react-native/jest/preprocessor.js"
+    },
+    "transformIgnorePatterns": [
+      "/node_modules/(?!react-native|native-base|react-clone-referenced-element)/.+"
+    ]
   },
   "rnpm": {
     "assets": [
@@ -55,19 +67,23 @@
     ]
   },
   "babel": {
-    "plugins": [[
-      "module-resolver", {
-    	  "root": ["."],
-    	  "alias": {
-    	  	"utils": "./utils.js",
-    		  "theme": "./theme.js",
-          "components": "./components",
-          "pages": "./pages",
-          "models": "./models",
-          "LocationPicker": "./components/LocationPicker"
-    	  }
-      }]
-   ]
- }
-
+    "plugins": [
+      [
+        "module-resolver",
+        {
+          "root": [
+            "."
+          ],
+          "alias": {
+            "utils": "./utils.js",
+            "theme": "./theme.js",
+            "components": "./components",
+            "pages": "./pages",
+            "models": "./models",
+            "LocationPicker": "./components/LocationPicker"
+          }
+        }
+      ]
+    ]
+  }
 }

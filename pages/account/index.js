@@ -1,79 +1,60 @@
-import React from 'react'
+import React from "react"
 import {
   StyleSheet,
   View,
   TouchableOpacity,
   RefreshControl,
   Text
-} from 'react-native'
-import {
-  CommonHeaderStyle
-} from 'utils'
-import AddAccountOverlay from './addAccountOverlay'
-import {
-  Button
-} from 'react-native-elements'
+} from "react-native"
+import { Button } from "components"
+import { CommonHeaderStyle } from "utils"
+import AddAccountOverlay from "./addAccountOverlay"
 
-import {
-  HeaderComponent,
-  Background,
-  AccountCard,
-  Icon
-} from 'components'
-import AccountModel from 'models/account'
+import { HeaderComponent, Background, AccountCard, Icon } from "components"
+import AccountModel from "models/account"
 
-import { StackActions } from 'react-navigation'
+import { StackActions } from "react-navigation"
 
-import { colors } from 'theme'
+import { colors } from "theme"
 const { textSecondary } = colors
 
 export default class AccountPage extends React.Component {
-  static navigationOptions = ({navigation}) => {
-    const {params = {}} = navigation.state
+  static navigationOptions = ({ navigation }) => {
+    const { params = {} } = navigation.state
     return {
-          headerStyle: CommonHeaderStyle,
-          headerTintColor: textSecondary,
-          headerTitle: (
-            <TouchableOpacity
-              onPress={
-                AccountModel.removeAllAccounts.bind(AccountModel)
-              }
-            >
-              <HeaderComponent
-                title="Accounts"
-                icon="exchange"
-              />
-            </TouchableOpacity>
-          ),
-          headerRight: (
-            <View style={{flexDirection: 'row'}}>
-              <TouchableOpacity
-                style={{justifyContent: 'center', alignItems: 'center'}}
-                onPress={() => navigation.navigate('Transactions')}
-              >
-                <Icon name="exchange" size={16}/>
-              </TouchableOpacity>
+      headerStyle: CommonHeaderStyle,
+      headerTintColor: textSecondary,
+      headerTitle: (
+        <TouchableOpacity
+          onPress={AccountModel.removeAllAccounts.bind(AccountModel)}
+        >
+          <HeaderComponent title="Accounts" icon="exchange" />
+        </TouchableOpacity>
+      ),
+      headerRight: (
+        <View style={{ flexDirection: "row" }}>
+          <TouchableOpacity
+            style={{ justifyContent: "center", alignItems: "center" }}
+            onPress={() => navigation.navigate("Transactions")}
+          >
+            <Icon name="exchange" size={16} />
+          </TouchableOpacity>
 
-              <Button
-                type="clear"
-                onPress={params.openAddAccountView}
-                icon={{name: "add"}}
-              />
-            </View>
-
-          )
-      }
+          <Button type="clear" onPress={params.openAddAccountView} icon="add" />
+        </View>
+      )
     }
-
+  }
 
   loadAccountList() {
-    this.setState({
-      refreshing: true
-    },
-    () => AccountModel.getAccounts()
-      .then(accounts => {
-        this.setState({accounts, refreshing: false})
-      })
+    this.setState(
+      {
+        refreshing: true
+      },
+      () =>
+        AccountModel.getAccounts().then(accounts => {
+          this.setState({ accounts, refreshing: false })
+        })
     )
   }
   constructor(props) {
@@ -83,13 +64,10 @@ export default class AccountPage extends React.Component {
       accounts: [],
       refreshing: false
     }
-    props.navigation.addListener('didFocus',
-      this.componentDidFocus.bind(this)
-    )
+    props.navigation.addListener("didFocus", this.componentDidFocus.bind(this))
   }
   removeAllAccounts() {
-    AccountModel.removeAllAccounts()
-    .then(this.loadAccountList.bind(this))
+    AccountModel.removeAllAccounts().then(this.loadAccountList.bind(this))
   }
   componentDidFocus() {
     this.loadAccountList()
@@ -124,41 +102,40 @@ export default class AccountPage extends React.Component {
             onRefresh={this.loadAccountList.bind(this)}
           />
         }
-        style={style.container}>
-          <AddAccountOverlay
-            onCreate={() => {}}
-            isOpen={this.state.accountViewOpened}
-            onClose={this.closeAddAccountView.bind(this)}
+        style={style.container}
+      >
+        <AddAccountOverlay
+          onCreate={() => {}}
+          isOpen={this.state.accountViewOpened}
+          onClose={this.closeAddAccountView.bind(this)}
+        />
+        {this.state.accounts.map(account => (
+          <AccountCard
+            key={account.name}
+            account={account}
+            accountList={this.state.accounts}
           />
-        {
-          this.state.accounts.map(account => (
-            <AccountCard
-              key={account.name}
-              account={account}
-              accountList={this.state.accounts}
-            />
-          ))
-        }
+        ))}
       </Background>
     )
   }
 }
 const style = StyleSheet.create({
   headerTitle: {
-    textAlign: 'center'
+    textAlign: "center"
   },
   container: {
-    flex: 1,
+    flex: 1
     // backgroundColor: '#F5FCFF',
   },
   welcome: {
     fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
+    textAlign: "center",
+    margin: 10
   },
   instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
-});
+    textAlign: "center",
+    color: "#333333",
+    marginBottom: 5
+  }
+})

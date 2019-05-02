@@ -1,18 +1,18 @@
-import { DB } from './'
+import { DB } from "./"
 
-import * as Yup from 'yup'
-import { latLngDistance } from 'utils'
+import * as Yup from "yup"
+import { latLngDistance } from "utils"
 // a transaction takes place in a location, which may or may not be recorded.
 export class Location {
   static get type() {
     return "LOCATION"
   }
 
-  static get initialLocationValues() {
+  static get initialValues() {
     return {
       location: {
         latitude: 0,
-        longitude: 0,
+        longitude: 0
       },
       name: ""
     }
@@ -20,12 +20,14 @@ export class Location {
 
   static get validationSchema() {
     return Yup.object().shape({
-      location: Yup.object().shape({
-        latitude: Yup.number().required(),
-        longitude: Yup.number().required()
-      }).required(),
+      location: Yup.object()
+        .shape({
+          latitude: Yup.number().required(),
+          longitude: Yup.number().required()
+        })
+        .required(),
       // optional string value
-      name: Yup.string(),
+      name: Yup.string()
     })
   }
 
@@ -52,24 +54,28 @@ export class Location {
       distance: number
     }
   */
-  async getSavedLocationsNearby({ latitude: lat, longitude: lng }, numLocations = 5) {
+  async getSavedLocationsNearby(
+    { latitude: lat, longitude: lng },
+    numLocations = 5
+  ) {
     const allLocations = await this.DB.findAsync({
       type: Location.type
     })
-    return allLocations.map(loc => {
+    return allLocations
+      .map(loc => {
         const { latitude: latLoc, longitude: lngLoc } = loc.location
-        return {...loc, distance: latLngDistance(latLoc, lngLoc, lat, lng)}
+        return { ...loc, distance: latLngDistance(latLoc, lngLoc, lat, lng) }
       })
-      .sort((a,b) => a.distance - b.distance)
+      .sort((a, b) => a.distance - b.distance)
       .slice(0, numLocations)
   }
 
   async recordLocation({
-      shouldSaveLocation,
-      registeredLocation,
-      ...locationValues
+    shouldSaveLocation,
+    registeredLocation,
+    ...locationValues
   }) {
-    if(registeredLocation) {
+    if (registeredLocation) {
       const { _id } = await this.DB.findOneAsync({
         type: Location.type,
         name: locationValues.name
@@ -77,16 +83,17 @@ export class Location {
       // pretend that we registered this location, and deliver it as result
       return _id
     } else {
-      if(!shouldSaveLocation) return { }
+      if (!shouldSaveLocation) return {}
       try {
         // not registered. registering location
-        const validationResult =
-          await Location.validationSchema.validate(locationValues)
-        if(validationResult) {
-          const {_id} = await this.DB.insertAsync({
+        const validationResult = await Location.validationSchema.validate(
+          locationValues
+        )
+        if (validationResult) {
+          const { _id } = await this.DB.insertAsync({
             ...locationValues,
-            type: Location.type,
-          } )
+            type: Location.type
+          })
 
           return _id
         } else {

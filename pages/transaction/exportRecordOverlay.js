@@ -5,18 +5,20 @@ import {
   View, StyleSheet, Text,
   ToastAndroid
 } from 'react-native'
-
-import TextInput from '../../components/TextInput'
-import Card from '../../components/Card'
 import {
-  Overlay, Button
-} from 'react-native-elements'
+  TextInput,
+  Card,
+  Button
+} from 'components'
+
+import { Overlay } from 'react-native-elements'
 import * as Yup from 'yup'
 import { Formik } from 'formik'
-import { colors } from '../../theme'
 
+import { colors } from 'theme'
 const { primary, white } = colors
-import { exportDB } from '../../models'
+
+import { exportDB } from 'models'
 
 export default class ExportRecordOverlay extends React.Component {
   static propTypes = {
