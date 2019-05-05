@@ -4,23 +4,23 @@ import TriggerModel, { Trigger } from "models/trigger"
 import Component from "./component"
 
 export default class TriggerPageContainer extends React.Component {
-  static navigationOptions = Component.navigationOptions
-  constructor(props) {
-    super(props)
+	static navigationOptions = Component.navigationOptions
+	constructor(props) {
+		super(props)
 
-    this.state = {
-      triggers: []
-    }
-  }
-  /**
+		this.state = {
+			triggers: []
+		}
+	}
+	/**
     Fetch all saved triggers when component is mounted.
   */
-  async componentDidMount() {
-    const triggers = await TriggerModel.getAllTriggers(false)
-    this.setState({ triggers })
-  }
+	async componentDidMount() {
+		const triggers = await TriggerModel.getAllTriggers(true)
+		this.setState({ triggers })
+	}
 
-  render() {
-    return <Component {...this.state} />
-  }
+	render() {
+		return <Component {...this.state} />
+	}
 }

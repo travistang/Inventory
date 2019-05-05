@@ -21,72 +21,75 @@ import TransactionPage from "pages/transaction"
 import TransactionDetailsPage from "pages/transaction/details"
 
 import TriggerPage from "pages/trigger"
+import CreateTriggerPage from "pages/item/details/trigger"
 
 import { FormattedProvider } from "react-native-globalize"
 import {
-  createBottomTabNavigator,
-  createAppContainer,
-  createStackNavigator
+	createBottomTabNavigator,
+	createAppContainer,
+	createStackNavigator
 } from "react-navigation"
 import { View, Text } from "react-native"
 import { ThemeProvider } from "react-native-elements"
 import Icon from "react-native-vector-icons/dist/FontAwesome"
-import { colors } from "theme"
+import { colors, iconOf } from "theme"
 
 const { background, primary } = colors
 
 // App navigation structure
 const RootNavigator = createBottomTabNavigator(
-  {
-    Account: createStackNavigator({
-      Account: { screen: AccountPage },
-      AccountDetails: { screen: AccountDetailsPage },
-      AddIncomePage: { screen: AddIncomePage },
-      TransferPage: { screen: TransferPage },
-      BuyPage: { screen: BuyPage },
+	{
+		Account: createStackNavigator({
+			Account: { screen: AccountPage },
+			AccountDetails: { screen: AccountDetailsPage },
+			AddIncomePage: { screen: AddIncomePage },
+			TransferPage: { screen: TransferPage },
+			BuyPage: { screen: BuyPage },
 
-      Transactions: { screen: TransactionPage },
-      AccountDetailsFromTransaction: { screen: AccountDetailsPage },
-      TransactionDetailsPage: { screen: TransactionDetailsPage }
-    }),
-    Buy: createStackNavigator({
-      GeneralBuyPage: { screen: BuyPage }
-    }),
-    Items: createStackNavigator({
-      Items: { screen: ItemPage },
-      ItemDetailsPage: { screen: ItemDetailsPage },
-      CreateItemPage: { screen: CreateItemPage }
-    }),
-    Consume: createStackNavigator({
-      Consume: { screen: ConsumePage }
-    }),
-    Triggers: createStackNavigator({
-      Trigger: { screen: TriggerPage }
-    })
-  },
-  {
-    defaultNavigationOptions: ({ navigation }) => ({
-      tabBarOptions: {
-        style: {
-          borderTopColor: "transparent",
-          backgroundColor: background
-        },
-        showLabel: false,
-        activeTintColor: primary
-      },
-      tabBarIcon: ({ focused, horizontal, tintColor }) => {
-        const { routeName } = navigation.state
-        const iconName = {
-          Account: "bank",
-          Items: "gift",
-          Buy: "shopping-cart",
-          Consume: "fire",
-          Transactions: "exchange"
-        }
-        return <Icon name={iconName[routeName]} size={24} color={tintColor} />
-      }
-    })
-  }
+			Transactions: { screen: TransactionPage },
+			AccountDetailsFromTransaction: { screen: AccountDetailsPage },
+			TransactionDetailsPage: { screen: TransactionDetailsPage }
+		}),
+		Buy: createStackNavigator({
+			GeneralBuyPage: { screen: BuyPage }
+		}),
+		Items: createStackNavigator({
+			Items: { screen: ItemPage },
+			ItemDetailsPage: { screen: ItemDetailsPage },
+			CreateItemPage: { screen: CreateItemPage },
+			CreateTriggerPage: { screen: CreateTriggerPage }
+		}),
+		Consume: createStackNavigator({
+			Consume: { screen: ConsumePage }
+		}),
+		Triggers: createStackNavigator({
+			Trigger: { screen: TriggerPage }
+		})
+	},
+	{
+		defaultNavigationOptions: ({ navigation }) => ({
+			tabBarOptions: {
+				style: {
+					borderTopColor: "transparent",
+					backgroundColor: background
+				},
+				showLabel: false,
+				activeTintColor: primary
+			},
+			tabBarIcon: ({ focused, horizontal, tintColor }) => {
+				const { routeName } = navigation.state
+				const iconName = {
+					Account: "bank",
+					Items: iconOf.item,
+					Buy: "shopping-cart",
+					Consume: "fire",
+					Transactions: "exchange",
+					Triggers: iconOf.trigger
+				}
+				return <Icon name={iconName[routeName]} size={24} color={tintColor} />
+			}
+		})
+	}
 )
 
 const AppContainer = createAppContainer(RootNavigator)
@@ -94,13 +97,13 @@ const AppContainer = createAppContainer(RootNavigator)
 configureGlobalProps()
 
 export default class App extends React.Component {
-  render() {
-    return (
-      <ThemeProvider theme={theme}>
-        <FormattedProvider>
-          <AppContainer />
-        </FormattedProvider>
-      </ThemeProvider>
-    )
-  }
+	render() {
+		return (
+			<ThemeProvider theme={theme}>
+				<FormattedProvider>
+					<AppContainer />
+				</FormattedProvider>
+			</ThemeProvider>
+		)
+	}
 }
