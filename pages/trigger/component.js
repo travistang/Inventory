@@ -9,6 +9,8 @@ import {
 	HeaderComponent
 } from "components"
 import { Text, View, StyleSheet } from "react-native"
+import ActivatedTriggerOverviewCard from "./activatedTriggerOverviewCard"
+
 import PropTypes from "prop-types"
 const { primary, secondary } = colors
 
@@ -33,7 +35,7 @@ export default class TriggerPage extends React.Component {
 				{triggers.length ? (
 					<ContentCard>
 						{triggers.map(trig => (
-							<Text>{trig.name}</Text>
+							<ActivatedTriggerOverviewCard trigger={trig} />
 						))}
 					</ContentCard>
 				) : (

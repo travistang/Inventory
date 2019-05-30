@@ -48,6 +48,7 @@ export default class ItemPage extends React.Component {
 	toItemPage(item) {
 		this.props.navigation.push("ItemDetailsPage", { item })
 	}
+
 	render() {
 		const { items: allItems, searchTerm } = this.state
 		const finalState = {

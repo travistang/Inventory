@@ -1,6 +1,6 @@
 import React from "react"
 import TriggerModel from "models/trigger"
-import { Item } from "models/items"
+import ItemModel, { Item } from "models/items"
 import { withNavigation } from "react-navigation"
 import PropTypes from "prop-types"
 import Component from "./component"
@@ -12,38 +12,46 @@ export class CreateTriggerPageContainer extends React.Component {
 		super(props)
 
 		this.state = {
-			triggers: [],
-			item: {}, // to be set in componentDidMount
+			item: null,
 			showError: false
 		}
 	}
+	async reloadItem(id = null) {
+		const itemFromState = this.state.item
+		if (!itemFromState && !id) return // can't find item id in both location
+		const useId = id ? id : itemFromState._id // if the id is given, use that id to load item; else use the one in state
+		if (useId) {
+			const item = await ItemModel.getItemById(useId)
+			this.setState({ item })
+		}
+	}
+	async onToggleActivate(triggerType) {
+		const isTriggerToggled = await TriggerModel.toggleActivate(
+			this.state.item,
+			triggerType
+		)
+		if (isTriggerToggled) {
+			this.reloadItem()
+		}
+	}
+
 	/**
 		Fetch the list of trigger associated to the item
 	*/
 	async componentDidMount() {
-		const item = this.props.navigation.getParam("item", {})
-		this.setState({ item })
-
-		const triggers = await TriggerModel.getTriggerOfItem(item._id)
-		this.setState({ triggers })
+		const { _id } = this.props.navigation.getParam("item", {})
+		this.reloadItem(_id)
 	}
-	/**
-    Invoke actual trigger insertion.
-    If the Trigger is added, the form will be reset, otherwise the form stays unchanged and error is reported.
-  */
-	async addTrigger(trigger) {
-		const triggerAdded = await TriggerModel.addTrigger(trigger)
 
-		if (triggerAdded) {
-			// reset form here.
-		} else {
-			this.setState({ showError: true })
-			// the time to toggle the flag back
-			setTimeout(() => this.setState({ showError: false }), 3000)
-		}
-	}
 	render() {
-		return <Component {...this.state} />
+		const { item } = this.state
+		if (!item) return null
+		return (
+			<Component
+				{...this.state}
+				onToggleActivate={this.onToggleActivate.bind(this)}
+			/>
+		)
 	}
 }
 

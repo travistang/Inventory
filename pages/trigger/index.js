@@ -16,7 +16,7 @@ export default class TriggerPageContainer extends React.Component {
     Fetch all saved triggers when component is mounted.
   */
 	async componentDidMount() {
-		const triggers = await TriggerModel.getAllTriggers(true)
+		const triggers = await TriggerModel.getActivatedTriggers()
 		this.setState({ triggers })
 	}
 

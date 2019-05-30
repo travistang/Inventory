@@ -1,6 +1,8 @@
 import { DB } from "./"
 import * as Yup from "yup"
-import ItemModel from "./items"
+import ItemModel, { Item } from "./items"
+import PropTypes from "prop-types"
+
 /**
   Trigger is an object that describes relations betwee items quantity and corresponding actions.
   Suppose you want to add an item to the buy list
@@ -20,6 +22,14 @@ export class Trigger {
 			QUANTITY_LESS_THAN: 1
 		}
 	}
+	static triggerTypeDescription(type) {
+		switch (type) {
+			case Trigger.triggerType.QUANTITY_LESS_THAN:
+				return "Quantity"
+			default:
+				return ""
+		}
+	}
 	/**
     Define the initial values for forms that involves the creation of trigger.
 
@@ -30,12 +40,22 @@ export class Trigger {
   */
 	static get initialValues() {
 		return {
-			name: "",
-			item: null,
+			activated: false,
 			triggerType: Object.values(Trigger.triggerType)[0],
-			triggerValue: 0,
-			date: new Date()
+			triggerValue: 0
 		}
+	}
+	/**
+    Define the propTypes of Trigger objects.
+
+  */
+	static get propTypes() {
+		return PropTypes.shape({
+			activated: PropTypes.bool.isRequired,
+			triggerType: PropTypes.number.oneOf(Object.values(Trigger.triggerType)),
+			triggerValue: PropTypes.oneOfType([PropTypes.number, PropTypes.date])
+				.isRequired
+		})
 	}
 	/**
     Define the schema of Trigger objects.
@@ -44,15 +64,11 @@ export class Trigger {
   */
 	static get validationSchema() {
 		return Yup.object().shape({
-			name: Yup.string().required(),
-			// the ID of the item for this trigger to monitor on
-			item: Yup.string().required(),
+			activated: Yup.bool().required(),
 			triggerType: Yup.number()
 				.required()
 				.oneOf(Object.values(Trigger.triggerType)),
-			triggerValue: Yup.mixed().required(),
-			// date of the trigger created
-			date: Yup.date().required()
+			triggerValue: Yup.mixed().required()
 		})
 	}
 
@@ -60,61 +76,40 @@ export class Trigger {
 		this.DB = DB
 	}
 	/**
-    Add a trigger to the database
+    Get the text description of trigger type.
 
-    @param {Object} trigger object to be added.
-    @returns {Boolean} true if inserted; false otherwise
+    @return string: the description
   */
-	async addTrigger(trigger) {
-		try {
-			Trigger.validationSchema.validate(trigger)
-			// marking this object as a Trigger object.
-			const result = await DB.insertAsync({
-				type: Trigger.type,
-				...trigger
-			})
-			return !!result
-		} catch (_) {
-			console.log(`catch in add trigger: ${_}`)
-			return false
+	static nameForType(type) {
+		switch (type) {
+			case Trigger.triggerType.QUANTITY_LESS_THAN:
+				return "quantity"
+			default:
+				return ""
 		}
 	}
 
 	/**
-    Get a trigger by it's ID.
+    Get the default value of trigger type.
 
-    @param {string} ID of the trigger.
-    @returns {Object} trigger with given ID. Or `null` when no such trigger found.
-
+    @return mixed: The default value, can be of any type, depending on the given type.
   */
-	async getTrigger(_id) {
-		return await this.DB.findOneAsync({
-			type: Trigger.type,
-			_id
-		})
-	}
-
-	async getTriggerOfItem(item) {
-		return await this.DB.findAsync({
-			type: Trigger.type,
-			item
-		})
-	}
-	/**
-    Get all triggers registered.
-
-    @param {boolean} expanded: indicate whether the returned triggers are expanded or not.
-    @return {array} list of triggers
-  */
-	async getAllTriggers(expanded = false) {
-		const triggers = await this.DB.findAsync({ type: Trigger.type })
-		if (expanded) {
-			return Promise.all(triggers.map(t => this.expandTrigger(t)))
-		} else {
-			return triggers
+	static defaultValueForType(type) {
+		switch (type) {
+			case Trigger.triggerType.QUANTITY_LESS_THAN:
+				return 0
+			default:
+				return null
 		}
 	}
 
+	static get defaultTriggersForItem() {
+		return Object.values(Trigger.triggerType).map(triggerType => ({
+			triggerType,
+			triggerValue: Trigger.defaultValueForType(triggerType),
+			activated: false
+		}))
+	}
 	/**
     Get all triggers activated.
 
@@ -122,61 +117,51 @@ export class Trigger {
   */
 	async getActivatedTriggers() {
 		// get and expand triggers
-		const triggers = await this.getAllTriggers()
-		const expandedTrigger = await Promise.all(
-			triggers.map(this.expandTrigger.bind(this))
+		const items = await ItemModel.getItems()
+		const itemWithActiveTriggers = items.map(item => ({
+			// now this is all items with their active triggers
+			...item,
+			triggers: item.triggers.filter(trig => trig.activated)
+		}))
+
+		const activeTriggers = itemWithActiveTriggers.reduce(
+			// this is list of active triggers with associated item in it
+			(list, item) => [
+				...list,
+				...item.triggers.map(trig => ({ ...trig, item }))
+			],
+			[]
 		)
-		// then filter out those that is activated
-		return expandedTrigger.filter(trig => this.isTriggerActivated(trig))
+		return activeTriggers
 	}
-
 	/**
-    Given a trigger object, return an "expanded" trigger object
-    by replacing the "item" field of it with the actual item.
-
-    @param {Object} trigger: trigger matching validation schema with `item` field to be a string.
-
-    @returns {Object} trigger with `item` field holding the actual item data.
-    @returns {Object} if no such item is found, return the given object untouched.
-   */
-	async expandTrigger(trigger) {
-		// determine if the given object suits the trigger schema
-		try {
-			Trigger.validationSchema.validate(trigger)
-		} catch (_) {
-			return trigger
-		}
-
-		// fetch the item within the trigger.
-		const item = await ItemModel.getItemById(trigger.item)
-		if (!item) return trigger // huh?!
-
-		return {
-			...trigger,
-			item
-		}
-	}
-
-	/**
-    Verify if a trigger is activated according to the trigger type.
-    A trigger is said to be activated if it suits the requirement.
-
-    @param {Object} expandedTrigger: trigger that has an expanded item field (by using Trigger#expandTrigger)
-
-    @returns false if the trigger is found unexpanded.
-    @returns true if trigger is expanded and is activated; false otherwise.
+    Given a trigger for an item and the type of trigger interested,
   */
-	isTriggerActivated(expandedTrigger) {
-		if (typeof expandedTrigger.item !== "object") {
-			return false
-		}
-		const { item, triggerType, triggerValue } = expandedTrigger
-		switch (triggerType) {
-			case Trigger.triggerType.QUANTITY_LESS_THAN:
-				return item.amount <= triggerValue
-			default:
-				return false
-		}
+	async toggleActivate(item, triggerType) {
+		const itemRef = await ItemModel.getItemById(item._id)
+		if (!itemRef) return false
+		const currentTriggerConfig = itemRef.triggers.filter(
+			trig => trig.triggerType == triggerType
+		)[0]
+		const otherTriggers = itemRef.triggers.filter(
+			trig => trig.triggerType != triggerType
+		)
+		const updateResult = await this.DB.updateAsync(
+			{ _id: item._id },
+			{
+				// update op
+				$set: {
+					triggers: [
+						...otherTriggers, // keep oher irrelevant trigger
+						{
+							...currentTriggerConfig,
+							activated: !currentTriggerConfig.activated // change the activated flag fot this trigger type only
+						}
+					]
+				}
+			}
+		)
+		return true
 	}
 }
 

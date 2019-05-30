@@ -31,7 +31,8 @@ export const rgbToHex = (r, g, b) => {
 
 export const iconOf = {
 	item: "gift",
-	trigger: "crosshairs"
+	trigger: "crosshairs",
+	transaction: "exchange"
 }
 export const colors = {
 	background: rgbToHex(248, 249, 250),
