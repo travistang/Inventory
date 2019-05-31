@@ -26,6 +26,7 @@ import Icon from "react-native-vector-icons/dist/FontAwesome"
 // local sub-components
 import TagLeftBadge from "./TagLeftBadge"
 import PreviewItemListItem from "./PreviewItemListItem"
+import SearchResultListItem from "./SearchResultsListItem"
 
 // utils and backends
 import * as _ from "lodash"
@@ -167,32 +168,7 @@ export default class ItemsInput extends React.Component {
 		)
 		return result
 	}
-	searchResultListItem(item) {
-		const { name, amount } = item
-		const { itemChanges } = this.state
-		const hasBeenSelected = itemChanges.filter(i => i.name == name).length > 0
-		const onSelectItem = (() => {
-			this.setState({
-				choosingQuantityForItem: item
-			})
-		}).bind(this)
-		return (
-			<ListItem
-				key={name}
-				title={name}
-				style={style.searchResultItem}
-				rightElement={
-					<View style={style.previewItemChangeTextContainer}>
-						<Text style={style.previewItemChangeText}>
-							{FormatItemAmount(amount, item)}
-						</Text>
-					</View>
-				}
-				badge={(hasBeenSelected && { value: "selected" }) || null}
-				onPress={(!hasBeenSelected && onSelectItem) || null}
-			/>
-		)
-	}
+
 	getQuantityOptions() {
 		const { isBuying } = this.props
 		return quantityOptions[isBuying ? "buy" : "consume"]
@@ -211,6 +187,13 @@ export default class ItemsInput extends React.Component {
 		})
 		this.reportProposedItemChange()
 	}
+
+	onSearchResultItemSelected(item) {
+		this.setState({
+			choosingQuantityForItem: item
+		})
+	}
+
 	getQuantitySelectionOverlay() {
 		const {
 			quantity: selectedQuantity, // what's inside the `quantity` field
@@ -406,7 +389,13 @@ export default class ItemsInput extends React.Component {
 					{searchTermDirty ? (
 						searchResult.length ? (
 							<ScrollView style={style.searchResult}>
-								{searchResult.map(this.searchResultListItem.bind(this))}
+								{searchResult.map(item => (
+									<SearchResultListItem
+										item={item}
+										itemChanges={this.state.itemChanges}
+										onSelectItem={this.onSearchResultItemSelected.bind(this)}
+									/>
+								))}
 							</ScrollView>
 						) : (
 							<CenterNotice title="No result" />
@@ -432,7 +421,7 @@ export default class ItemsInput extends React.Component {
 			<ScrollView>
 				{this.getItemSelectionOverlay()}
 				{choosingQuantityForItem && this.getQuantitySelectionOverlay()}
-				{// list of items that is subject to change
+				{// list of items that are subject to change
 				itemChanges.length ? (
 					<View>
 						<View style={style.headerRow}>
@@ -486,16 +475,12 @@ const style = StyleSheet.create({
 	h4: {
 		fontSize: 22
 	},
-	previewItemChangeText: {
-		display: "flex",
-		flexDirection: "row",
-		justifyContent: "space-around",
-		marginVertical: 8
-	},
-	searchResultListItem: {
-		fontWeight: "bold",
-		color: "green"
-	},
+	// previewItemChangeText: {
+	// 	display: "flex",
+	// 	flexDirection: "row",
+	// 	justifyContent: "space-around",
+	// 	marginVertical: 8
+	// },
 	container: {},
 	headerRow: {
 		flexDirection: "row",
@@ -513,14 +498,6 @@ const style = StyleSheet.create({
 		padding: 16,
 		display: "flex",
 		flex: 1
-	},
-	previewItemChangeText: {
-		color: secondary,
-		fontWeight: "bold"
-	},
-	previewItemChangeTextContainer: {
-		display: "flex",
-		flexDirection: "row"
 	},
 
 	actionChip: {
