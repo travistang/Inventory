@@ -4,6 +4,7 @@ import ItemModel, { Item } from "models/items"
 import { withNavigation } from "react-navigation"
 import PropTypes from "prop-types"
 import Component from "./component"
+import { ToastAndroid } from "react-native"
 
 export class CreateTriggerPageContainer extends React.Component {
 	static navigationOptions = Component.navigationOptions
@@ -13,7 +14,7 @@ export class CreateTriggerPageContainer extends React.Component {
 
 		this.state = {
 			item: null,
-			showError: false
+			errorMessage: null
 		}
 	}
 	async reloadItem(id = null) {
@@ -32,9 +33,28 @@ export class CreateTriggerPageContainer extends React.Component {
 		)
 		if (isTriggerToggled) {
 			this.reloadItem()
+		} else {
+			this.showError("Cannot toggle trigger")
 		}
 	}
 
+	async onUpdateValue(triggerType, value) {
+		const isValueUpdated = await TriggerModel.updateTriggerValue(
+			this.state.item,
+			triggerType,
+			value
+		)
+		if (isValueUpdated) {
+			this.reloadItem()
+			this.showError("trigger value updated") // HACK: display a message through 'error'
+		} else {
+			this.showError("Cannot update value")
+		}
+	}
+
+	showError(errorMessage) {
+		this.setState({ errorMessage })
+	}
 	/**
 		Fetch the list of trigger associated to the item
 	*/
@@ -49,6 +69,7 @@ export class CreateTriggerPageContainer extends React.Component {
 		return (
 			<Component
 				{...this.state}
+				onUpdateValue={this.onUpdateValue.bind(this)}
 				onToggleActivate={this.onToggleActivate.bind(this)}
 			/>
 		)

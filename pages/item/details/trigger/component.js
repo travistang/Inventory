@@ -1,5 +1,5 @@
 import React from "react"
-import { View, Text, StyleSheet } from "react-native"
+import { View, Text, StyleSheet, ToastAndroid } from "react-native"
 import { CommonHeaderStyle } from "utils"
 import { colors, iconOf } from "theme"
 import { HeaderComponent, Background } from "components"
@@ -23,15 +23,22 @@ export default class CreateTriggerPage extends React.Component {
 			headerTitle: <HeaderComponent title="trigger" icon={iconOf.trigger} />
 		}
 	}
-
+	componentDidUpdate(prevProps, prevState, _) {
+		const { errorMessage } = this.props
+		if (prevProps.errorMessage != errorMessage) {
+			ToastAndroid.show(errorMessage, ToastAndroid.SHORT)
+		}
+	}
 	render() {
-		const { item, onToggleActivate } = this.props
+		const { item, onToggleActivate, onUpdateValue } = this.props
 		// alert(`item triggers: ${JSON.stringify(item.triggers)}`)
 		return (
 			<Background style={style.container}>
 				{item.triggers.map(({ triggerType, ...triggerAttributes }) => (
 					<TriggerOptionCard
+						key={triggerType}
 						onToggleActivate={() => onToggleActivate(triggerType)}
+						onUpdateValue={v => onUpdateValue(triggerType, v)}
 						triggerType={triggerType}
 						{...triggerAttributes}
 					/>

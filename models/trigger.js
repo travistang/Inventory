@@ -135,17 +135,31 @@ export class Trigger {
 		return activeTriggers
 	}
 	/**
-    Given a trigger for an item and the type of trigger interested,
-  */
-	async toggleActivate(item, triggerType) {
+		Common routing for modifying values / properties of a trigger of a particular item
+		Each trigger is uniquely determined by the item it belongs to and the type of itself.
+		only 'activate' and 'value' can be changed there, so if both are not provided nothing is going to change
+	*/
+	async _setTriggerOfItem(
+		item,
+		triggerType,
+		toggleActivate = false,
+		value = null
+	) {
+		if (!toggleActivate && !value) return false // nothing to change
+		// start by getting items
 		const itemRef = await ItemModel.getItemById(item._id)
 		if (!itemRef) return false
+		// getting the actual config
 		const currentTriggerConfig = itemRef.triggers.filter(
 			trig => trig.triggerType == triggerType
 		)[0]
+
+		if (!currentTriggerConfig) return false // if the triggerType is invalid this line will guard
+		// for spreading in the '$set' field
 		const otherTriggers = itemRef.triggers.filter(
 			trig => trig.triggerType != triggerType
 		)
+
 		const updateResult = await this.DB.updateAsync(
 			{ _id: item._id },
 			{
@@ -155,13 +169,26 @@ export class Trigger {
 						...otherTriggers, // keep oher irrelevant trigger
 						{
 							...currentTriggerConfig,
-							activated: !currentTriggerConfig.activated // change the activated flag fot this trigger type only
+							activated: toggleActivate
+								? !currentTriggerConfig.activated // if it should be toggled, negate it...
+								: currentTriggerConfig.activated, // otherwise keep it as is
+							triggerValue: value != null ? value : currentTriggerConfig.value // so is for the value
 						}
 					]
 				}
 			}
 		)
 		return true
+	}
+	/**
+    Given a trigger for an item and the type of trigger interested,
+  */
+	async toggleActivate(item, triggerType) {
+		return await this._setTriggerOfItem(item, triggerType, true, null)
+	}
+
+	async updateTriggerValue(item, triggerType, value) {
+		return await this._setTriggerOfItem(item, triggerType, false, value)
 	}
 }
 
