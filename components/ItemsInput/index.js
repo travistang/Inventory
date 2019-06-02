@@ -9,7 +9,7 @@ import {
 	Text,
 	Platform
 } from "react-native"
-import { ListItem, SearchBar, Overlay } from "react-native-elements"
+import { SearchBar, Overlay } from "react-native-elements"
 import {
 	ActionChip,
 	Button,
@@ -26,7 +26,8 @@ import Icon from "react-native-vector-icons/dist/FontAwesome"
 // local sub-components
 import TagLeftBadge from "./TagLeftBadge"
 import PreviewItemListItem from "./PreviewItemListItem"
-import SearchResultListItem from "./SearchResultsListItem"
+
+import ItemSelectionOverlay from "./ItemSelectionOverlay"
 
 // utils and backends
 import * as _ from "lodash"
@@ -105,8 +106,7 @@ export default class ItemsInput extends React.Component {
 			isSelectingItem: false,
 
 			// this is the value for the item name search
-			searchText: "",
-			searchTermDirty: false,
+			itemSearchResults: [],
 
 			// these are for the overlay that helps choosing the quantity
 			quantity: 0,
@@ -137,8 +137,7 @@ export default class ItemsInput extends React.Component {
 		// clear everything after the selection
 		this.setState({
 			isSelectingItem: false,
-			searchTermDirty: false,
-			searchText: ""
+			itemSearchResults: []
 		})
 	}
 	getOriginalItem(name) {
@@ -160,15 +159,6 @@ export default class ItemsInput extends React.Component {
 			() => this.reportProposedItemChange()
 		)
 	}
-	itemFilteredByName() {
-		const { items, searchText } = this.state
-
-		const result = items.filter(
-			item => item.name.toLowerCase().indexOf(searchText.toLowerCase()) > -1
-		)
-		return result
-	}
-
 	getQuantityOptions() {
 		const { isBuying } = this.props
 		return quantityOptions[isBuying ? "buy" : "consume"]
@@ -352,74 +342,38 @@ export default class ItemsInput extends React.Component {
 
 		return true
 	}
-	getItemSelectionOverlay() {
-		const { isSelectingItem, searchText, searchTermDirty } = this.state
-		const searchResult = this.itemFilteredByName()
-		const onBackdropPress = this.hideItemSelectView.bind(this)
-		return (
-			<Overlay
-				fullScreen
-				onBackdropPress={onBackdropPress}
-				style={{ backgroundColor: background }}
-				isVisible={isSelectingItem}>
-				<View style={style.itemSelectionOverlayContainer}>
-					<View style={style.headerRow}>
-						<Text style={style.h4}>{"Choose an item".toUpperCase()}</Text>
-						{this.isIOS && <Button onPress={onBackdropPress}>Back</Button>}
-					</View>
 
-					<SearchBar
-						lightTheme
-						autoFocus
-						containerStyle={{
-							marginTop: 16,
-							borderColor: "transparent",
-							shadowColor: "transparent",
-							elevation: 0,
-							backgroundColor: background
-						}}
-						style={style.searchBar}
-						placeholder="Search item..."
-						onChangeText={searchText => {
-							const searchTermDirty = searchText != ""
-							this.setState({ searchText, searchTermDirty })
-						}}
-						value={searchText}
-					/>
-					{searchTermDirty ? (
-						searchResult.length ? (
-							<ScrollView style={style.searchResult}>
-								{searchResult.map(item => (
-									<SearchResultListItem
-										item={item}
-										itemChanges={this.state.itemChanges}
-										onSelectItem={this.onSearchResultItemSelected.bind(this)}
-									/>
-								))}
-							</ScrollView>
-						) : (
-							<CenterNotice title="No result" />
-						)
-					) : (
-						<CenterNotice icon="search" title="Type to Start searching" />
-					)}
-				</View>
-			</Overlay>
+	searchItems(searchText) {
+		const itemSearchResults = this.state.items.filter(
+			item => item.name.toLowerCase().indexOf(searchText.toLowerCase()) > -1
 		)
+		this.setState({ itemSearchResults })
 	}
+
 	// return a list of items that are selected selection
 
 	render() {
-		const { items, itemChanges, choosingQuantityForItem } = this.state
 		const {
-			isBuying,
-			onFinishSelection,
-			account = { currency: "" }
-		} = this.props
-		const { currency } = account
+			items,
+			itemChanges,
+			choosingQuantityForItem,
+			isSelectingItem,
+			itemSearchResults
+		} = this.state
+
+		const { isBuying, account = { currency: "" } } = this.props
+
 		return (
 			<ScrollView>
-				{this.getItemSelectionOverlay()}
+				<ItemSelectionOverlay
+					itemChanges={itemChanges}
+					isSelectingItem={isSelectingItem}
+					onSearchTermChanged={this.searchItems.bind(this)}
+					searchResult={itemSearchResults}
+					onBackdropPress={this.hideItemSelectView.bind(this)}
+					onSelectItem={this.onSearchResultItemSelected.bind(this)}
+				/>
+
 				{choosingQuantityForItem && this.getQuantitySelectionOverlay()}
 				{// list of items that are subject to change
 				itemChanges.length ? (
@@ -438,8 +392,8 @@ export default class ItemsInput extends React.Component {
 							<PreviewItemListItem
 								changedItem={changedItem}
 								originalItem={this.getOriginalItem(changedItem.name)}
-								isBuying={this.props.isBuying}
-								account={this.props.account}
+								isBuying={isBuying}
+								account={account}
 								removePreviewItem={this.removePreviewItem.bind(this)}
 								onSelectItem={this.onPreivewItemListItemSelected.bind(this)}
 							/>
